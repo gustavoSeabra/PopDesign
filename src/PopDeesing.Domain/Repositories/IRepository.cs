@@ -1,10 +1,11 @@
 ﻿namespace PopDesing.Domain.Repositories;
 
-public interface IRepository<TEntity> : IDisposable where TEntity : class
+public interface IRepository<T> : IDisposable where T : class
 {
-    Task<int> SalvarMudancasAsync(CancellationToken cancellationToken = default);
-    void Adicionar(TEntity entitidade);
-    void Atualizar(TEntity entitidade);
-    void Remover(TEntity entitidade);
-    void DesanexaEntidade(TEntity entitidade);
+    IUnitOfWork UnitOfWork { get; }
+
+    void Adicionar(T entitidade);
+    void Atualizar(T entitidade);
+    void Remover(T entitidade);
+    void DesanexaEntidade(T entitidade);
 }
