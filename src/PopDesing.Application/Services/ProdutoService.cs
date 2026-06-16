@@ -3,6 +3,7 @@ using PopDesing.Application.Services.Interfaces;
 using PopDesing.Domain.Repositories;
 using PopDesing.Domain.Entities;
 using PopDesing.Application.Mappers;
+using System.ComponentModel;
 
 namespace PopDesing.Application.Services;
 
@@ -57,10 +58,14 @@ public class ProdutoService : IProdutoService
             return ResultadoDto<bool>.RetornaNaoEncontrado("Produto não encontrado para atualização.");
 
         // Atualiza propriedades básicas
-        produtoExistente.Nome = dto.Nome;
-        produtoExistente.PrecoCusto = dto.PrecoCusto;
-        produtoExistente.QuantidadeFilamento = dto.QuantidadeFilamento;
-        produtoExistente.TempoImpressao = dto.TempoImpressao;
+        if(!string.IsNullOrEmpty(dto.Nome))
+            produtoExistente.Nome = dto.Nome;
+        if(dto.PrecoCusto.HasValue)
+            produtoExistente.PrecoCusto = dto.PrecoCusto.Value;
+        if(dto.QuantidadeFilamento.HasValue)
+            produtoExistente.QuantidadeFilamento = dto.QuantidadeFilamento.Value;
+        if(dto.TempoImpressao.HasValue)
+            produtoExistente.TempoImpressao = dto.TempoImpressao.Value;
 
         // Atualiza Composição (simplificado: remove e adiciona)
         produtoExistente.ComposicoesPai.Clear();
@@ -68,7 +73,10 @@ public class ProdutoService : IProdutoService
         {
             foreach (var comp in dto.Componentes)
             {
-                produtoExistente.ComposicoesPai.Add(new ProdutoComposicao { IdProdutoFilho = comp.IdProdutoFilho, Quantidade = comp.Quantidade });
+                if (comp.IdProdutoFilho != Guid.Empty)
+                {
+                    produtoExistente.ComposicoesPai.Add(new ProdutoComposicao { IdProdutoFilho = comp.IdProdutoFilho, Quantidade = comp.Quantidade });
+                }
             }
         }
 

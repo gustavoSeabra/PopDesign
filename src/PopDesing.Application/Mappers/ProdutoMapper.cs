@@ -16,7 +16,7 @@ public static class ProdutoMapper
             PrecoCusto = produto.PrecoCusto,
             QuantidadeFilamento = produto.QuantidadeFilamento,
             TempoImpressao = produto.TempoImpressao,
-            Componentes = produto.ComposicoesPai?.Select(c => ToDto(c.ProdutoFilho)).ToList()
+            Componentes = produto.ComposicoesPai?.Where(c => c.ProdutoFilho != null).Select(c => ToDto(c.ProdutoFilho!)).ToList()
         };
     }
 
@@ -30,11 +30,13 @@ public static class ProdutoMapper
             PrecoCusto = dto.PrecoCusto,
             QuantidadeFilamento = dto.QuantidadeFilamento,
             TempoImpressao = dto.TempoImpressao,
-            ComposicoesPai = dto.Componentes?.Select(c => new ProdutoComposicao
-            {
-                IdProdutoFilho = c.IdProdutoFilho,
-                Quantidade = c.Quantidade
-            }).ToList() ?? new List<ProdutoComposicao>()
+            ComposicoesPai = dto.Componentes?
+                .Where(c => c.IdProdutoFilho != Guid.Empty)
+                .Select(c => new ProdutoComposicao
+                {
+                    IdProdutoFilho = c.IdProdutoFilho,
+                    Quantidade = c.Quantidade
+                }).ToList() ?? new List<ProdutoComposicao>()
         };
     }
 }

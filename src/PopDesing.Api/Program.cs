@@ -22,8 +22,8 @@ builder.Services.AddOpenApi();
 // Adicionando as dependencias do projeto
 builder.Services
     .AddDatabase(builder.Configuration)
-    .AddApiDependencyGroup(builder.Configuration)
-    .AddValidationConfiguration();
+    .AddApiDependencyGroup(builder.Configuration);
+    // .AddValidationConfiguration();
 
 // Adicionando suporte para log usando o SERILOG
 builder.Host.UseSerilog((context, configuration) =>
@@ -32,15 +32,13 @@ builder.Host.UseSerilog((context, configuration) =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.MapOpenApi();
-}
+    app.MapScalarApiReference();
 
-app.MapOpenApi();
-app.MapScalarApiReference();
-
-app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
+    app.MapGet("/", () => Results.Redirect("/scalar")).ExcludeFromDescription();
+//}
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 

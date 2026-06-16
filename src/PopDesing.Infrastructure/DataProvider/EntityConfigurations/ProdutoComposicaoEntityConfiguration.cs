@@ -17,12 +17,14 @@ public class ProdutoComposicaoEntityConfiguration : IEntityTypeConfiguration<Pro
         builder.HasOne(pc => pc.ProdutoPai)
             .WithMany(p => p.ComposicoesPai)
             .HasForeignKey(pc => pc.IdProdutoPai)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired(false);
 
         builder.HasOne(pc => pc.ProdutoFilho)
             .WithMany(p => p.ComposicoesFilho)
             .HasForeignKey(pc => pc.IdProdutoFilho)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
 
         builder.HasIndex(pc => new { pc.IdProdutoPai, pc.IdProdutoFilho }).IsUnique();
     }

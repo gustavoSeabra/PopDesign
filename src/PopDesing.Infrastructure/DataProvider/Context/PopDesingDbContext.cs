@@ -1,9 +1,10 @@
 ﻿﻿using Microsoft.EntityFrameworkCore;
 using PopDesing.Domain.Entities;
+using PopDesing.Domain.Repositories;
 
 namespace PopDesing.Infrastructure.DataProvider.Context;
 
-public class PopDesingDbContext: DbContext
+public class PopDesingDbContext: DbContext, IUnitOfWork
 {
     public PopDesingDbContext(DbContextOptions<PopDesingDbContext> options) : base(options)
     {
