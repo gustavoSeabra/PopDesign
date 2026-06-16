@@ -3,86 +3,138 @@ using PopDesing.Application.Services.Interfaces;
 using PopDesing.Domain.Repositories;
 using PopDesing.Domain.Entities;
 using PopDesing.Application.Mappers;
-using System.ComponentModel;
+using Microsoft.Extensions.Logging;
 
 namespace PopDesing.Application.Services;
 
-public class ProdutoService : IProdutoService
+public class ProdutoService(IProdutoRepository produtoRepository, ILogger<ProdutoService> logger) : IProdutoService
 {
-    private readonly IProdutoRepository _produtoRepository;
-
-    public ProdutoService(IProdutoRepository produtoRepository)
-    {
-        _produtoRepository = produtoRepository;
-    }
-
     public async Task<ResultadoDto<IEnumerable<ProdutoDto>>> ObterTodosAsync(CancellationToken cancellationToken = default)
     {
-        var produtos = await _produtoRepository.ObterTodosProdutosAsync(cancellationToken);
-        var dtos = produtos.Select(p => p.ToDto());
-        return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaSucesso(dtos);
+        try
+        {
+            logger.LogInformation("Iniciando consulta de todos os produtos.");
+            
+            var produtos = await produtoRepository.ObterTodosProdutosAsync(cancellationToken);
+            var dtos = produtos.Select(p => p.ToDto());
+            
+            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaSucesso(dtos);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Erro ao obter todos os produtos.");
+            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaErro("Ocorreu um erro ao recuperar a lista de produtos.", ex);
+        }
     }
 
     public async Task<ResultadoDto<ProdutoDto?>> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var produto = await _produtoRepository.ObterProdutosPorIdAsync(id, cancellationToken);
-        
-        if (produto == null)
-            return ResultadoDto<ProdutoDto?>.RetornaNaoEncontrado("Produto não encontrado");
+        try
+        {
+            logger.LogInformation("Buscando produto com ID: {ProdutoId}", id);
 
-        return ResultadoDto<ProdutoDto?>.RetornaSucesso(produto.ToDto());
+            var produto = await produtoRepository.ObterProdutosPorIdAsync(id, cancellationToken);
+            
+            if (produto == null)
+            {
+                logger.LogWarning("Produto {ProdutoId} não encontrado.", id);
+                return ResultadoDto<ProdutoDto?>.RetornaNaoEncontrado("Produto não encontrado");
+            }
+
+            return ResultadoDto<ProdutoDto?>.RetornaSucesso(produto.ToDto());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Erro ao buscar produto com ID: {ProdutoId}", id);
+            return ResultadoDto<ProdutoDto?>.RetornaErro($"Erro ao buscar os detalhes do produto {id}.", ex);
+        }
     }
 
     public async Task<ResultadoDto<IEnumerable<ProdutoDto>>> ObterPorNomeAsync(string nome, CancellationToken cancellationToken = default)
     {
-        var produtos = await _produtoRepository.ObterProdutosPorNomeAsync(nome, cancellationToken);
-        var dtos = produtos.Select(p => p.ToDto());
-        return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaSucesso(dtos);
+        try
+        {
+            logger.LogInformation("Pesquisando produtos pelo nome: {NomeBusca}", nome);
+
+            var produtos = await produtoRepository.ObterProdutosPorNomeAsync(nome, cancellationToken);
+            var dtos = produtos.Select(p => p.ToDto());
+
+            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaSucesso(dtos);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Erro ao pesquisar produtos pelo nome: {NomeBusca}", nome);
+            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaErro("Erro ao realizar a busca por nome.", ex);
+        }
     }
 
     public async Task<ResultadoDto<Guid>> AdicionarAsync(CreateProdutoDto dto, CancellationToken cancellationToken = default)
     {
-        var produto = dto.ToEntity();
+        try
+        {
+            logger.LogInformation("Tentando adicionar novo produto: {NomeProduto}", dto.Nome);
 
-        _produtoRepository.Adicionar(produto);
-        await _produtoRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            var produto = dto.ToEntity();
+            produtoRepository.Adicionar(produto);
+            await produtoRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
-        return ResultadoDto<Guid>.RetornaSucesso(produto.IdProduto);
+            logger.LogInformation("Produto criado com sucesso. ID: {ProdutoId}", produto.IdProduto);
+            return ResultadoDto<Guid>.RetornaSucesso(produto.IdProduto);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Erro ao adicionar produto: {NomeProduto}", dto.Nome);
+            return ResultadoDto<Guid>.RetornaErro("Não foi possível salvar o produto.", ex);
+        }
     }
 
     public async Task<ResultadoDto<bool>> AtualizarAsync(UpdateProdutoDto dto, CancellationToken cancellationToken = default)
     {
-        var produtoExistente = await _produtoRepository.ObterProdutosPorIdAsync(dto.IdProduto, cancellationToken);
-
-        if (produtoExistente == null)
-            return ResultadoDto<bool>.RetornaNaoEncontrado("Produto não encontrado para atualização.");
-
-        // Atualiza propriedades básicas
-        if(!string.IsNullOrEmpty(dto.Nome))
-            produtoExistente.Nome = dto.Nome;
-        if(dto.PrecoCusto.HasValue)
-            produtoExistente.PrecoCusto = dto.PrecoCusto.Value;
-        if(dto.QuantidadeFilamento.HasValue)
-            produtoExistente.QuantidadeFilamento = dto.QuantidadeFilamento.Value;
-        if(dto.TempoImpressao.HasValue)
-            produtoExistente.TempoImpressao = dto.TempoImpressao.Value;
-
-        // Atualiza Composição (simplificado: remove e adiciona)
-        produtoExistente.ComposicoesPai.Clear();
-        if (dto.Componentes != null)
+        try
         {
-            foreach (var comp in dto.Componentes)
+            logger.LogInformation("Iniciando atualização do produto {ProdutoId}.", dto.IdProduto);
+
+            var produtoExistente = await produtoRepository.ObterProdutosPorIdAsync(dto.IdProduto, cancellationToken);
+
+            if (produtoExistente == null)
             {
-                if (comp.IdProdutoFilho != Guid.Empty)
+                logger.LogWarning("Falha na atualização: Produto {ProdutoId} inexistente.", dto.IdProduto);
+                return ResultadoDto<bool>.RetornaNaoEncontrado("Produto não encontrado para atualização.");
+            }
+
+            // Atualiza propriedades básicas
+            if(!string.IsNullOrEmpty(dto.Nome))
+                produtoExistente.Nome = dto.Nome;
+            if(dto.PrecoCusto.HasValue)
+                produtoExistente.PrecoCusto = dto.PrecoCusto.Value;
+            if(dto.QuantidadeFilamento.HasValue)
+                produtoExistente.QuantidadeFilamento = dto.QuantidadeFilamento.Value;
+            if(dto.TempoImpressao.HasValue)
+                produtoExistente.TempoImpressao = dto.TempoImpressao.Value;
+
+            // Atualiza Composição (simplificado: remove e adiciona)
+            produtoExistente.ComposicoesPai.Clear();
+            if (dto.Componentes != null)
+            {
+                foreach (var comp in dto.Componentes)
                 {
-                    produtoExistente.ComposicoesPai.Add(new ProdutoComposicao { IdProdutoFilho = comp.IdProdutoFilho, Quantidade = comp.Quantidade });
+                    if (comp.IdProdutoFilho != Guid.Empty)
+                    {
+                        produtoExistente.ComposicoesPai.Add(new ProdutoComposicao { IdProdutoFilho = comp.IdProdutoFilho, Quantidade = comp.Quantidade });
+                    }
                 }
             }
+
+            produtoRepository.Atualizar(produtoExistente);
+            await produtoRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+            logger.LogInformation("Produto {ProdutoId} atualizado com sucesso.", dto.IdProduto);
+            return ResultadoDto<bool>.RetornaSucesso("Produto atualizado com sucesso.");
         }
-
-        _produtoRepository.Atualizar(produtoExistente);
-        await _produtoRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-
-        return ResultadoDto<bool>.RetornaSucesso("Produto atualizado com sucesso.");
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Erro ao atualizar produto {ProdutoId}.", dto.IdProduto);
+            return ResultadoDto<bool>.RetornaErro("Erro ao processar a atualização do produto.", ex);
+        }
     }
 }

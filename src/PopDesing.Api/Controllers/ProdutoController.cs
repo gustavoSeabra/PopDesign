@@ -3,18 +3,11 @@ using PopDesing.Application.Dtos;
 using PopDesing.Application.Services.Interfaces;
 
 namespace PopDesing.Api.Controllers;
-
+    
 [ApiController]
 [Route("api/[controller]")]
-public class ProdutoController : ControllerBase
+public class ProdutoController(IProdutoService produtoService) : ControllerBase
 {
-    private readonly IProdutoService _produtoService;
-
-    public ProdutoController(IProdutoService produtoService)
-    {
-        _produtoService = produtoService;
-    }
-
     /// <summary>
     /// Obtém a listagem completa de produtos.
     /// </summary>
@@ -23,7 +16,7 @@ public class ProdutoController : ControllerBase
     [ProducesResponseType(typeof(ResultadoDto<IEnumerable<ProdutoDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ObterTodos(CancellationToken cancellationToken)
     {
-        var resultado = await _produtoService.ObterTodosAsync(cancellationToken);
+        var resultado = await produtoService.ObterTodosAsync(cancellationToken);
         return Ok(resultado);
     }
 
@@ -37,7 +30,7 @@ public class ProdutoController : ControllerBase
     [ProducesResponseType(typeof(ResultadoDto<ProdutoDto>), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ObterPorId(Guid id, CancellationToken cancellationToken)
     {
-        var resultado = await _produtoService.ObterPorIdAsync(id, cancellationToken);
+        var resultado = await produtoService.ObterPorIdAsync(id, cancellationToken);
 
         if (resultado.NotFound)
             return NotFound(resultado);
@@ -54,7 +47,7 @@ public class ProdutoController : ControllerBase
     [ProducesResponseType(typeof(ResultadoDto<IEnumerable<ProdutoDto>>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ObterPorNome(string nome, CancellationToken cancellationToken)
     {
-        var resultado = await _produtoService.ObterPorNomeAsync(nome, cancellationToken);
+        var resultado = await produtoService.ObterPorNomeAsync(nome, cancellationToken);
         return Ok(resultado);
     }
 
@@ -68,7 +61,7 @@ public class ProdutoController : ControllerBase
     [ProducesResponseType(typeof(ResultadoDto<Guid>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Adicionar([FromBody] CreateProdutoDto dto, CancellationToken cancellationToken)
     {
-        var resultado = await _produtoService.AdicionarAsync(dto, cancellationToken);
+        var resultado = await produtoService.AdicionarAsync(dto, cancellationToken);
 
         return resultado.Ok 
             ? CreatedAtAction(nameof(ObterPorId), new { id = resultado.Data }, resultado) 
@@ -86,7 +79,7 @@ public class ProdutoController : ControllerBase
     [ProducesResponseType(typeof(ResultadoDto<bool>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Atualizar([FromBody] UpdateProdutoDto dto, CancellationToken cancellationToken)
     {
-        var resultado = await _produtoService.AtualizarAsync(dto, cancellationToken);
+        var resultado = await produtoService.AtualizarAsync(dto, cancellationToken);
 
         if (resultado.NotFound)
             return NotFound(resultado);
