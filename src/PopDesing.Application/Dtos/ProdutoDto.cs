@@ -13,9 +13,9 @@ public class ProdutoDto
 public class CreateProdutoDto
 {
     public string Nome { get; set; } = string.Empty;
-    public decimal PrecoCusto { get; set; }
-    public decimal QuantidadeFilamento { get; set; }
-    public int TempoImpressao { get; set; }
+    public decimal? PrecoCusto { get; set; }
+    public decimal? QuantidadeFilamento { get; set; }
+    public int? TempoImpressao { get; set; }
     public List<ProdutoComponenteDto>? Componentes { get; set; }
 }
 

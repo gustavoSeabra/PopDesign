@@ -27,9 +27,9 @@ public static class ProdutoMapper
         return new Produto
         {
             Nome = dto.Nome,
-            PrecoCusto = dto.PrecoCusto,
-            QuantidadeFilamento = dto.QuantidadeFilamento,
-            TempoImpressao = dto.TempoImpressao,
+            PrecoCusto = dto.PrecoCusto.HasValue? dto.PrecoCusto.Value : 0,
+            QuantidadeFilamento = dto.QuantidadeFilamento.HasValue? dto.QuantidadeFilamento.Value : 0,
+            TempoImpressao = dto.TempoImpressao.HasValue? dto.TempoImpressao.Value : 0,
             ComposicoesPai = dto.Componentes?
                 .Where(c => c.IdProdutoFilho != Guid.Empty)
                 .Select(c => new ProdutoComposicao

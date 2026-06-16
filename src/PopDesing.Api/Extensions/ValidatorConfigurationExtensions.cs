@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using PopDesing.Application.Dtos;
 using PopDesing.Application.Validators;
@@ -9,11 +10,11 @@ public static class ValidatorConfigurationExtensions
 {
     public static IServiceCollection AddValidationConfiguration(this IServiceCollection services)
     {
-        // services.AddFluentValidationAutoValidation();
-        // services.AddFluentValidationClientsideAdapters();
+        services.AddFluentValidationAutoValidation();
 
-        services.AddValidatorsFromAssemblyContaining<CreateEquipamentoValidator>();
-        // services.AddValidatorsFromAssemblyContaining<UpdateEnderecoValidator>();
+        services.AddValidatorsFromAssemblyContaining<CreateProdutoValidator>();
+        services.AddValidatorsFromAssemblyContaining<UpdateProdutoValidator>();
+        // services.AddValidatorsFromAssemblyContaining<CreateEquipamentoValidator>();
 
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
 

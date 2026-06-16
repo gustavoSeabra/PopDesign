@@ -22,8 +22,8 @@ builder.Services.AddOpenApi();
 // Adicionando as dependencias do projeto
 builder.Services
     .AddDatabase(builder.Configuration)
-    .AddApiDependencyGroup(builder.Configuration);
-    // .AddValidationConfiguration();
+    .AddApiDependencyGroup(builder.Configuration)
+    .AddValidationConfiguration();
 
 // Adicionando suporte para log usando o SERILOG
 builder.Host.UseSerilog((context, configuration) =>
