@@ -6,6 +6,7 @@ services:
     image: "postgres"
     restart: always
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "Password1"
       POSTGRES_DB: PopDesing
     ports:
@@ -18,18 +19,18 @@ services:
     depends_on:
       - db
     environment:
-      - ASPNETCORE_HTTP_PORTS=8080
-      - ConnectionStrings__PopDesingApi="Host=db; Database=PopDesing; UserName=postgres; Password=Password1"
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__PopDesingApi: Host=db;Port=5432;Database=PopDesing;Username=postgres;Password=Password1
     ports:
       - "8081:8080"
 
-#  carteon-app:
-#    container_name: carteon-app
+#  popdesing-app:
+#    container_name: popdesing-app
 #    build:
 #      context: .
-#      dockerfile: "./docker/dockerfile-carteonApp"
+#      dockerfile: "./docker/dockerfile-popdesingApp"
 #    depends_on:
-#      - carteon-api
+#      - popdesing-api
 #    restart: always
 #    ports:
 #      - "8080:80"
