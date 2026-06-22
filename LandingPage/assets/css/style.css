@@ -259,6 +259,79 @@ section.show {
 }
 
 /* --------------------------------------------------------
+   Marketplaces Section
+   -------------------------------------------------------- */
+.marketplaces-section {
+    padding: 16px 0;
+}
+
+.marketplaces-card {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 126, 121, 0.08);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-subtle);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 28px 20px;
+}
+
+.marketplaces-tag {
+    color: var(--primary);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+}
+
+.marketplaces-title {
+    color: var(--black);
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 8px;
+}
+
+.marketplaces-text {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.marketplaces-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr;
+}
+
+.marketplace-link {
+    align-items: center;
+    background-color: var(--white);
+    border: 1px solid rgba(255, 126, 121, 0.08);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-subtle);
+    display: flex;
+    justify-content: center;
+    min-height: 76px;
+    padding: 14px 18px;
+    transition: var(--transition-smooth);
+}
+
+.marketplace-link:hover {
+    border-color: rgba(255, 126, 121, 0.24);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-4px);
+}
+
+.marketplace-logo {
+    height: 44px;
+    max-width: 180px;
+    object-fit: contain;
+    width: 100%;
+}
+
+/* --------------------------------------------------------
    Categories Section
    -------------------------------------------------------- */
 .categories-section {
@@ -705,6 +778,10 @@ section.show {
     .categories-section {
         padding-top: 0;
     }
+
+    .marketplaces-section {
+        padding-top: 8px;
+    }
 }
 
 /* Tablet Breakpoint (min-width: 768px) */
@@ -720,6 +797,14 @@ section.show {
     .categories-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 24px;
+    }
+
+    .marketplaces-card {
+        padding: 30px 32px;
+    }
+
+    .marketplaces-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
     
     /* Make the 5th card full-width on tablet for balance */
@@ -876,6 +961,35 @@ section.show {
 
     .category-card {
         padding: 40px 20px;
+    }
+
+    /* Marketplaces */
+    .marketplaces-section {
+        padding: 18px 0;
+    }
+
+    .marketplaces-card {
+        align-items: center;
+        grid-template-columns: 0.85fr 1.15fr;
+        padding: 34px 44px;
+    }
+
+    .marketplaces-title {
+        font-size: 2rem;
+    }
+
+    .marketplaces-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .marketplace-link {
+        min-height: 88px;
+        padding: 16px;
+    }
+
+    .marketplace-logo {
+        height: 48px;
+        max-width: 150px;
     }
 
     /* Construction */
