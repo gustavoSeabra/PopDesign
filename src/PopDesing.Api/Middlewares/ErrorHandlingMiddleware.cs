@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace PopDesing.Api.Middlewares
 {
-    public class ErrorHandlingMiddleware(RequestDelegate next)
+    public class ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
     {
         public async Task Invoke(HttpContext context)
         {
@@ -14,14 +14,15 @@ namespace PopDesing.Api.Middlewares
             }
             catch (Exception ex)
             {
-                await TratarExceptionAsync(context, ex);
+                logger.LogError(ex, "Erro inesperado ao processar a requisição.");
+                await TratarExceptionAsync(context);
             }
         }
 
-        private static Task TratarExceptionAsync(HttpContext context, Exception ex)
+        private static Task TratarExceptionAsync(HttpContext context)
         {
             var code = HttpStatusCode.InternalServerError;
-            var result = ResultadoDto<bool>.RetornaErro($"Um erro inesperado ocorreu. Detalhes: {ex.Message}", ex);
+            var result = ResultadoDto<bool>.RetornaErro("Um erro inesperado ocorreu.");
 
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)code;

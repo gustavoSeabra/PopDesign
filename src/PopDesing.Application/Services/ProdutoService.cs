@@ -23,7 +23,7 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
         catch (Exception ex)
         {
             logger.LogError(ex, "Erro ao obter todos os produtos.");
-            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaErro("Ocorreu um erro ao recuperar a lista de produtos.", ex);
+            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaErro("Ocorreu um erro ao recuperar a lista de produtos.");
         }
     }
 
@@ -46,7 +46,7 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
         catch (Exception ex)
         {
             logger.LogError(ex, "Erro ao buscar produto com ID: {ProdutoId}", id);
-            return ResultadoDto<ProdutoDto?>.RetornaErro($"Erro ao buscar os detalhes do produto {id}.", ex);
+            return ResultadoDto<ProdutoDto?>.RetornaErro($"Erro ao buscar os detalhes do produto {id}.");
         }
     }
 
@@ -64,7 +64,7 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
         catch (Exception ex)
         {
             logger.LogError(ex, "Erro ao pesquisar produtos pelo nome: {NomeBusca}", nome);
-            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaErro("Erro ao realizar a busca por nome.", ex);
+            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaErro("Erro ao realizar a busca por nome.");
         }
     }
 
@@ -84,7 +84,7 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
         catch (Exception ex)
         {
             logger.LogError(ex, "Erro ao adicionar produto: {NomeProduto}", dto.Nome);
-            return ResultadoDto<Guid>.RetornaErro("Não foi possível salvar o produto.", ex);
+            return ResultadoDto<Guid>.RetornaErro("Não foi possível salvar o produto.");
         }
     }
 
@@ -134,7 +134,7 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
         catch (Exception ex)
         {
             logger.LogError(ex, "Erro ao atualizar produto {ProdutoId}.", dto.IdProduto);
-            return ResultadoDto<bool>.RetornaErro("Erro ao processar a atualização do produto.", ex);
+            return ResultadoDto<bool>.RetornaErro("Erro ao processar a atualização do produto.");
         }
     }
 }

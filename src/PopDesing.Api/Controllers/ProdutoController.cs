@@ -6,7 +6,7 @@ namespace PopDesing.Api.Controllers;
     
 [ApiController]
 [Route("api/[controller]")]
-public class ProdutoController(IProdutoService produtoService) : ControllerBase
+public class ProdutoController(IProdutoService produtoService) : BaseController
 {
     /// <summary>
     /// Obtém a listagem completa de produtos.
@@ -17,7 +17,7 @@ public class ProdutoController(IProdutoService produtoService) : ControllerBase
     public async Task<IActionResult> ObterTodos(CancellationToken cancellationToken)
     {
         var resultado = await produtoService.ObterTodosAsync(cancellationToken);
-        return Ok(resultado);
+        return Responder(resultado);
     }
 
     /// <summary>
@@ -31,11 +31,7 @@ public class ProdutoController(IProdutoService produtoService) : ControllerBase
     public async Task<IActionResult> ObterPorId(Guid id, CancellationToken cancellationToken)
     {
         var resultado = await produtoService.ObterPorIdAsync(id, cancellationToken);
-
-        if (resultado.NotFound)
-            return NotFound(resultado);
-
-        return resultado.Ok ? Ok(resultado) : BadRequest(resultado);
+        return Responder(resultado);
     }
 
     /// <summary>
@@ -48,7 +44,7 @@ public class ProdutoController(IProdutoService produtoService) : ControllerBase
     public async Task<IActionResult> ObterPorNome(string nome, CancellationToken cancellationToken)
     {
         var resultado = await produtoService.ObterPorNomeAsync(nome, cancellationToken);
-        return Ok(resultado);
+        return Responder(resultado);
     }
 
     /// <summary>
@@ -80,10 +76,6 @@ public class ProdutoController(IProdutoService produtoService) : ControllerBase
     public async Task<IActionResult> Atualizar([FromBody] UpdateProdutoDto dto, CancellationToken cancellationToken)
     {
         var resultado = await produtoService.AtualizarAsync(dto, cancellationToken);
-
-        if (resultado.NotFound)
-            return NotFound(resultado);
-
-        return resultado.Ok ? Ok(resultado) : BadRequest(resultado);
+        return Responder(resultado);
     }
 }
