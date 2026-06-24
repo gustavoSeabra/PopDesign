@@ -13,8 +13,6 @@ public static class ValidatorConfigurationExtensions
         services.AddFluentValidationAutoValidation();
 
         services.AddValidatorsFromAssemblyContaining<CreateProdutoValidator>();
-        services.AddValidatorsFromAssemblyContaining<UpdateProdutoValidator>();
-        // services.AddValidatorsFromAssemblyContaining<CreateEquipamentoValidator>();
 
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
 

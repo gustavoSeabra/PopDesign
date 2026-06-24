@@ -13,6 +13,7 @@ public static class DependencyInjectionExtensions
     {
         // Services
         services.AddScoped<IProdutoService, ProdutoService>();
+        services.AddScoped<IEquipamentoService, EquipamentoService>();
 
         // Repositórios
         services.AddScoped<IEquipamentoRepository, EquipamentoRepository>();
