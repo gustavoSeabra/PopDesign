@@ -6,6 +6,8 @@ namespace PopDesing.Infrastructure.Repositories;
 
 public abstract class BaseRepository<T> : IRepository<T> where T : class
 {
+    protected const string LikeEscapeCharacter = "\\";
+
     protected readonly PopDesingDbContext dbContext;
 
     public IUnitOfWork UnitOfWork => (IUnitOfWork)dbContext;
@@ -25,6 +27,9 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
 
     public void DesanexaEntidade(T entitidade) =>
         dbContext.Entry(entitidade).State = EntityState.Detached;
+
+    protected static string CriarPadraoBusca(string termo) =>
+        $"%{termo.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_")}%";
 
     public void Dispose()
     {
