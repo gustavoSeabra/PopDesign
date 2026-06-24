@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PopDesing.Infrastructure.DataProvider.Context;
@@ -16,7 +15,6 @@ public static class DatabaseConfigurationExtensions
             options.UseNpgsql(
                 connectionString,
                 sqlOptions => sqlOptions
-                    .MigrationsHistoryTable(HistoryRepository.DefaultTableName, PopDesingDbContext.Schema)
                     .CommandTimeout(60)
                     .EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(60), null)
             );

@@ -19,8 +19,6 @@ public class PopDesingDbContext: DbContext, IUnitOfWork
         base.OnModelCreating(modelBuilder);
     }
 
-    public const string Schema = "dbo";
-
     public DbSet<Equipamento> Equipamentos { get; set; }
     public DbSet<Produto> Produtos { get; set; }
     public DbSet<ProdutoComposicao> ProdutoComposicoes { get; set; }
