@@ -11,6 +11,12 @@ public class EquipamentoRepository : BaseRepository<Equipamento>, IEquipamentoRe
     {
     }
 
+    public override void Remover(Equipamento equipamento)
+    {
+        equipamento.Excluir();
+        dbContext.Set<Equipamento>().Update(equipamento);
+    }
+
     public async Task<IEnumerable<Equipamento>> ObterEquipamentosPorApelidoAsync(string apelido, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Equipamento>()
             .Where(e => e.Apelido.Contains(apelido))
@@ -23,6 +29,12 @@ public class EquipamentoRepository : BaseRepository<Equipamento>, IEquipamentoRe
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.IdEquipamento == idEquipamento, cancellationToken);
 
+    public async Task<IEnumerable<Equipamento>> ObterEquipamentosDesativadosAsync(CancellationToken cancellationToken = default) =>
+        await dbContext.Set<Equipamento>()
+            .IgnoreQueryFilters()
+            .Where(e => e.Excluido)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
 
     public async Task<IEnumerable<Equipamento>> ObterEquipamentosPorNomeAsync(string nome, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Equipamento>()

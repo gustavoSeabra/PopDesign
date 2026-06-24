@@ -20,7 +20,7 @@ public abstract class BaseRepository<T> : IRepository<T> where T : class
     public void Atualizar(T entitidade) =>
         dbContext.Set<T>().Update(entitidade);
 
-    public void Remover(T entitidade) =>
+    public virtual void Remover(T entitidade) =>
         dbContext.Set<T>().Remove(entitidade);
 
     public void DesanexaEntidade(T entitidade) =>

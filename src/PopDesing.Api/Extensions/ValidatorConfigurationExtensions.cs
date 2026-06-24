@@ -14,7 +14,8 @@ public static class ValidatorConfigurationExtensions
 
         services.AddValidatorsFromAssemblyContaining<CreateProdutoValidator>();
         services.AddValidatorsFromAssemblyContaining<UpdateProdutoValidator>();
-        // services.AddValidatorsFromAssemblyContaining<CreateEquipamentoValidator>();
+        services.AddValidatorsFromAssemblyContaining<CreateEquipamentoValidator>();
+        services.AddValidatorsFromAssemblyContaining<UpdateEquipamentoValidator>();
 
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
 
