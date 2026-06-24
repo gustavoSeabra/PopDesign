@@ -20,7 +20,7 @@ public class ProdutoRepository : BaseRepository<Produto>, IProdutoRepository
 
     public async Task<IEnumerable<Produto>> ObterProdutosPorNomeAsync(string nome, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Produto>()
-            .Where(p => p.Nome.Contains(nome))
+            .Where(p => EF.Functions.ILike(p.Nome, $"%{nome}%"))
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 

@@ -19,7 +19,7 @@ public class EquipamentoRepository : BaseRepository<Equipamento>, IEquipamentoRe
 
     public async Task<IEnumerable<Equipamento>> ObterEquipamentosPorApelidoAsync(string apelido, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Equipamento>()
-            .Where(e => e.Apelido.Contains(apelido))
+            .Where(e => EF.Functions.ILike(e.Apelido, $"%{apelido}%"))
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     
@@ -44,7 +44,7 @@ public class EquipamentoRepository : BaseRepository<Equipamento>, IEquipamentoRe
 
     public async Task<IEnumerable<Equipamento>> ObterEquipamentosPorNomeAsync(string nome, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Equipamento>()
-            .Where(e => e.Nome.Contains(nome))
+            .Where(e => EF.Functions.ILike(e.Nome, $"%{nome}%"))
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
