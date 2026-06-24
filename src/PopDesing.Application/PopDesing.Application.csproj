@@ -12,12 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PopDeesing.Domain\PopDesing.Domain.csproj" />
+    <Folder Include="Mappers\" />
+    <Folder Include="Services\Interfaces\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Mappers\" />
-    <Folder Include="Services\Interfaces\" />
+    <ProjectReference Include="..\PopDesing.Domain\PopDesing.Domain.csproj" />
   </ItemGroup>
 
 </Project>

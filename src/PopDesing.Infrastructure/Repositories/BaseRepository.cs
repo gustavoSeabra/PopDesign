@@ -4,30 +4,27 @@ using PopDesing.Infrastructure.DataProvider.Context;
 
 namespace PopDesing.Infrastructure.Repositories;
 
-public abstract class BaseRepository<TEntity> : IRepository<TEntity> where TEntity : class
+public abstract class BaseRepository<T> : IRepository<T> where T : class
 {
     protected readonly PopDesingDbContext dbContext;
+
+    public IUnitOfWork UnitOfWork => (IUnitOfWork)dbContext;
 
     protected BaseRepository(PopDesingDbContext dbContext) =>
         this.dbContext = dbContext;
 
-    public void Adicionar(TEntity entitidade) =>
-        dbContext.Add(entitidade);
+    public void Adicionar(T entitidade) =>
+        dbContext.Set<T>().Add(entitidade);
 
 
-    public void Atualizar(TEntity entitidade) =>
-        dbContext.Update(entitidade);
+    public void Atualizar(T entitidade) =>
+        dbContext.Set<T>().Update(entitidade);
 
-    public void Remover(TEntity entitidade) =>
-        dbContext.Remove(entitidade);
+    public void Remover(T entitidade) =>
+        dbContext.Set<T>().Remove(entitidade);
 
-
-    public async Task<int> SalvarMudancasAsync(CancellationToken cancellationToken = default) =>
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-    public void DesanexaEntidade(TEntity entitidade) =>
+    public void DesanexaEntidade(T entitidade) =>
         dbContext.Entry(entitidade).State = EntityState.Detached;
-
 
     public void Dispose()
     {

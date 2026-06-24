@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿﻿using Microsoft.EntityFrameworkCore;
 using PopDesing.Domain.Entities;
+using PopDesing.Domain.Repositories;
 
 namespace PopDesing.Infrastructure.DataProvider.Context;
 
-public class PopDesingDbContext: DbContext
+public class PopDesingDbContext: DbContext, IUnitOfWork
 {
     public PopDesingDbContext(DbContextOptions<PopDesingDbContext> options) : base(options)
     {
@@ -18,7 +19,7 @@ public class PopDesingDbContext: DbContext
         base.OnModelCreating(modelBuilder);
     }
 
-    public const string Schema = "dbo";
-
     public DbSet<Equipamento> Equipamentos { get; set; }
+    public DbSet<Produto> Produtos { get; set; }
+    public DbSet<ProdutoComposicao> ProdutoComposicoes { get; set; }
 }

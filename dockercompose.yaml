@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: postgres-popdesing
+    image: "postgres"
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "Password1"
+      POSTGRES_DB: PopDesing
+    ports:
+      - 5432:5432
+  popdesing-api:
+    container_name: popdesing-api
+    build:
+      context: .
+      dockerfile: "./docker/dockerfile-popdesingapi"
+    depends_on:
+      - db
+    environment:
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__PopDesingApi: Host=db;Port=5432;Database=PopDesing;Username=postgres;Password=Password1
+    ports:
+      - "8081:8080"
+
+#  popdesing-app:
+#    container_name: popdesing-app
+#    build:
+#      context: .
+#      dockerfile: "./docker/dockerfile-popdesingApp"
+#    depends_on:
+#      - popdesing-api
+#    restart: always
+#    ports:
+#      - "8080:80"
