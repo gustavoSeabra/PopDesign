@@ -196,8 +196,7 @@ public class EquipamentoService(IEquipamentoRepository equipamentoRepository, IL
         {
             logger.LogInformation("Iniciando restauração do equipamento {EquipamentoId}.", id);
 
-            var equipamentosDesativados = await equipamentoRepository.ObterEquipamentosDesativadosAsync(cancellationToken);
-            var equipamento = equipamentosDesativados.FirstOrDefault(e => e.IdEquipamento == id);
+            var equipamento = await equipamentoRepository.ObterEquipamentoDesativadoPorIdAsync(id, cancellationToken);
 
             if (equipamento == null)
             {

@@ -36,6 +36,12 @@ public class EquipamentoRepository : BaseRepository<Equipamento>, IEquipamentoRe
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
+    public async Task<Equipamento?> ObterEquipamentoDesativadoPorIdAsync(Guid idEquipamento, CancellationToken cancellationToken = default) =>
+        await dbContext.Set<Equipamento>()
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.IdEquipamento == idEquipamento && e.Excluido, cancellationToken);
+
     public async Task<IEnumerable<Equipamento>> ObterEquipamentosPorNomeAsync(string nome, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Equipamento>()
             .Where(e => e.Nome.Contains(nome))

@@ -339,8 +339,8 @@ public class EquipamentoServiceTests
         Equipamento? equipamentoAtualizado = null;
 
         _equipamentoRepositoryMock
-            .Setup(repository => repository.ObterEquipamentosDesativadosAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Equipamento> { equipamento });
+            .Setup(repository => repository.ObterEquipamentoDesativadoPorIdAsync(equipamento.IdEquipamento, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(equipamento);
 
         _equipamentoRepositoryMock
             .Setup(repository => repository.Atualizar(It.IsAny<Equipamento>()))
@@ -372,8 +372,8 @@ public class EquipamentoServiceTests
         var idEquipamento = Guid.NewGuid();
 
         _equipamentoRepositoryMock
-            .Setup(repository => repository.ObterEquipamentosDesativadosAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Equipamento>());
+            .Setup(repository => repository.ObterEquipamentoDesativadoPorIdAsync(idEquipamento, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Equipamento?)null);
 
         var service = CriarService();
 
