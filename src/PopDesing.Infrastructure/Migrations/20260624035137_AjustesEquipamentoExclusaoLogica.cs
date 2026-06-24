@@ -31,12 +31,14 @@ namespace PopDesing.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: 0);
 
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<decimal>(
                 name: "ValorCompra",
                 table: "Equipamento",
-                type: "integer",
+                type: "numeric(10,2)",
+                precision: 10,
+                scale: 2,
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0m);
         }
 
         /// <inheritdoc />

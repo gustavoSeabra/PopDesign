@@ -58,8 +58,9 @@ namespace PopDesing.Infrastructure.Migrations
                     b.Property<int>("Potencia")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ValorCompra")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("ValorCompra")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
 
                     b.HasKey("IdEquipamento");
 

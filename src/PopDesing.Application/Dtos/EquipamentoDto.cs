@@ -7,7 +7,7 @@ public class EquipamentoDto
     public string Apelido { get; set; } = string.Empty;
     public DateTime DataCompra { get; set; }
     public int Potencia { get; set; }
-    public int ValorCompra { get; set; }
+    public decimal ValorCompra { get; set; }
     public int ExpectativaVida { get; set; }
     public bool Excluido { get; set; }
     public DateTime? DataExclusao { get; set; }
@@ -19,7 +19,7 @@ public class CreateEquipamentoDto
     public string Apelido { get; set; } = string.Empty;
     public DateTime? DataCompra { get; set; }
     public int? Potencia { get; set; }
-    public int? ValorCompra { get; set; }
+    public decimal? ValorCompra { get; set; }
     public int? ExpectativaVida { get; set; }
 }
 
@@ -30,6 +30,6 @@ public class UpdateEquipamentoDto
     public string Apelido { get; set; } = string.Empty;
     public DateTime? DataCompra { get; set; }
     public int? Potencia { get; set; }
-    public int? ValorCompra { get; set; }
+    public decimal? ValorCompra { get; set; }
     public int? ExpectativaVida { get; set; }
 }

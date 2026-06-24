@@ -15,7 +15,7 @@ public static class EquipamentoDtoMock
             Apelido = Faker.Commerce.ProductAdjective(),
             DataCompra = Faker.Date.Past().ToUniversalTime(),
             Potencia = Faker.Random.Int(100, 1000),
-            ValorCompra = Faker.Random.Int(500, 10000),
+            ValorCompra = Faker.Finance.Amount(500, 10000),
             ExpectativaVida = Faker.Random.Int(12, 120)
         };
 
@@ -27,7 +27,7 @@ public static class EquipamentoDtoMock
             Apelido = Faker.Commerce.ProductAdjective(),
             DataCompra = Faker.Date.Past().ToUniversalTime(),
             Potencia = Faker.Random.Int(100, 1000),
-            ValorCompra = Faker.Random.Int(500, 10000),
+            ValorCompra = Faker.Finance.Amount(500, 10000),
             ExpectativaVida = Faker.Random.Int(12, 120)
         };
 
@@ -39,7 +39,7 @@ public static class EquipamentoDtoMock
             Apelido = apelido ?? Faker.Commerce.ProductAdjective(),
             DataCompra = Faker.Date.Past().ToUniversalTime(),
             Potencia = Faker.Random.Int(100, 1000),
-            ValorCompra = Faker.Random.Int(500, 10000),
+            ValorCompra = Faker.Finance.Amount(500, 10000),
             ExpectativaVida = Faker.Random.Int(12, 120)
         };
 
