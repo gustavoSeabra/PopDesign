@@ -1,0 +1,52 @@
+Table Equipamento {
+  IdEquipamento uuid [pk, not null]
+  Nome varchar(100) [not null]
+  Apelido varchar(50) [null]
+  DataCompra datetime [not null]
+  Potencia int [not null]
+  ValorCompra decimal(10,2) [not null]
+  ExpectativaVida int [not null]
+  Excluido boolean [not null, default: false]
+  DataExclusao datetime [null]
+}
+
+Table Produto {
+  IdProduto uuid [pk, not null]
+  Nome varchar(100) [not null]
+  PrecoCusto decimal(10,2) [not null]
+  QuantidadeFilamento decimal(8,2) [not null]
+  TempoImpressao int [not null]
+}
+
+Table Produto_Composicao {
+  IdProdutoComposicao uuid [pk, not null]
+  IdProdutoPai uuid [null]
+  IdProdutoFilho uuid [null]
+  Quantidade int [not null, default: 1]
+
+  indexes {
+    (IdProdutoPai, IdProdutoFilho) [unique]
+  }
+}
+
+table Marketplace
+{
+  IdMarketplace uuid [primary key]
+  Nome varchar(100) [not null]
+  LinkLoja varchar(100)
+}
+
+table TaxasMarketplace
+{
+  IdTaxa uuid [primary key]
+  IdMarketplace uuid [not null]
+  ValorInicial NUMERIC(10, 2) [not null]
+  ValorFinal NUMERIC(10, 2) [not null]
+  Comissao int [not null]
+  TaxaFixa NUMERIC(10, 2)
+}
+
+Ref: Produto_Composicao.IdProdutoPai > Produto.IdProduto [delete: cascade]
+Ref: Produto_Composicao.IdProdutoFilho > Produto.IdProduto [delete: restrict]
+
+Ref: Marketplace.IdMarketplace < TaxasMarketplace.IdMarketplace
