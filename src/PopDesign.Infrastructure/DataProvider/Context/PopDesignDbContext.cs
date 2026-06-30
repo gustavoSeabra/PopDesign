@@ -22,4 +22,6 @@ public class PopDesignDbContext: DbContext, IUnitOfWork
     public DbSet<Equipamento> Equipamentos { get; set; }
     public DbSet<Produto> Produtos { get; set; }
     public DbSet<ProdutoComposicao> ProdutoComposicoes { get; set; }
+    public DbSet<Marketplace> Marketplaces { get; set; }
+    public DbSet<TaxasMarketplace> TaxasMarketplace { get; set; }
 }
