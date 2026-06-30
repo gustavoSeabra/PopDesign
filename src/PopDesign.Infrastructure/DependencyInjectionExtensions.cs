@@ -18,6 +18,8 @@ public static class DependencyInjectionExtensions
         // Repositórios
         services.AddScoped<IEquipamentoRepository, EquipamentoRepository>();
         services.AddScoped<IProdutoRepository, ProdutoRepository>();
+        services.AddScoped<IMarketplaceRepository, MarketplaceRepository>();
+        services.AddScoped<ITaxasMarketplaceRepository, TaxasMarketplaceRepository>();
 
         return services;
     }

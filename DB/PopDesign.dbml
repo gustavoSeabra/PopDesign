@@ -34,6 +34,8 @@ table Marketplace
   IdMarketplace uuid [primary key]
   Nome varchar(100) [not null]
   LinkLoja varchar(100)
+  Excluido boolean [not null, default: false]
+  DataExclusao datetime [null]
 }
 
 table TaxasMarketplace
