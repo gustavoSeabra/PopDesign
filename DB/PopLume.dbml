@@ -14,7 +14,6 @@ Table Equipamento {
 Table Produto {
   IdProduto uuid [pk, not null]
   Nome varchar(100) [not null]
-  PrecoCusto decimal(10,2) [not null, note: 'Atualizado somente por uma precificação persistida']
   TempoImpressaoMinutos int [not null]
   TempoMaoDeObraMinutos int [not null]
   IdEquipamento uuid [null]
@@ -29,15 +28,28 @@ Table Filamento {
   DataCompra date [not null]
 }
 
-Table ProdutoFilamento {
-  IdProdutoFilamento uuid [pk, not null]
+Table ProdutoVariacao {
+  IdProdutoVariacao uuid [pk, not null]
   IdProduto uuid [not null]
+  Nome varchar(50) [not null]
+  CodigoInterno varchar(50) [null]
+  Ativa boolean [not null, default: true]
+  PrecoCusto decimal(10,2) [not null]
+
+  indexes {
+    (IdProduto, Nome) [unique]
+  }
+}
+
+Table ProdutoVariacaoFilamento {
+  IdProdutoVariacaoFilamento uuid [pk, not null]
+  IdProdutoVariacao uuid [not null]
   IdFilamento uuid [not null]
   QuantidadeGramas decimal(10,3) [not null]
   PercentualPerda decimal(5,2) [not null]
 
   indexes {
-    (IdProduto, IdFilamento) [unique]
+    (IdProdutoVariacao, IdFilamento) [unique]
   }
 }
 
@@ -66,10 +78,11 @@ Table Produto_Composicao {
   IdProdutoComposicao uuid [pk, not null]
   IdProdutoPai uuid [not null]
   IdProdutoFilho uuid [not null]
+  IdProdutoVariacaoFilho uuid [not null]
   Quantidade int [not null, default: 1]
 
   indexes {
-    (IdProdutoPai, IdProdutoFilho) [unique]
+    (IdProdutoPai, IdProdutoFilho, IdProdutoVariacaoFilho) [unique]
   }
 }
 
@@ -115,6 +128,7 @@ Table CustoMaoDeObra {
 Table FichaPrecificacao {
   IdFichaPrecificacao uuid [pk, not null]
   IdProduto uuid [not null]
+  IdProdutoVariacao uuid [not null]
   IdEquipamento uuid [not null]
   IdTarifaEnergia uuid [not null]
   IdCustoMaoDeObra uuid [not null]
@@ -139,6 +153,7 @@ Table FichaPrecificacao {
 
   indexes {
     (IdProduto, CalculadaEmUtc)
+    (IdProdutoVariacao, CalculadaEmUtc)
   }
 }
 
@@ -154,18 +169,21 @@ Table ItemFichaPrecificacao {
 
 Ref: Produto.IdEquipamento > Equipamento.IdEquipamento [delete: restrict]
 
-Ref: ProdutoFilamento.IdProduto > Produto.IdProduto [delete: cascade]
-Ref: ProdutoFilamento.IdFilamento > Filamento.IdFilamento [delete: restrict]
+Ref: ProdutoVariacao.IdProduto > Produto.IdProduto [delete: cascade]
+Ref: ProdutoVariacaoFilamento.IdProdutoVariacao > ProdutoVariacao.IdProdutoVariacao [delete: cascade]
+Ref: ProdutoVariacaoFilamento.IdFilamento > Filamento.IdFilamento [delete: restrict]
 
 Ref: ProdutoInsumo.IdProduto > Produto.IdProduto [delete: cascade]
 Ref: ProdutoInsumo.IdInsumo > Insumo.IdInsumo [delete: restrict]
 
 Ref: Produto_Composicao.IdProdutoPai > Produto.IdProduto [delete: cascade]
 Ref: Produto_Composicao.IdProdutoFilho > Produto.IdProduto [delete: restrict]
+Ref: Produto_Composicao.IdProdutoVariacaoFilho > ProdutoVariacao.IdProdutoVariacao [delete: restrict]
 
 Ref: TaxasMarketplace.IdMarketplace > Marketplace.IdMarketplace [delete: cascade]
 
 Ref: FichaPrecificacao.IdProduto > Produto.IdProduto [delete: restrict]
+Ref: FichaPrecificacao.IdProdutoVariacao > ProdutoVariacao.IdProdutoVariacao [delete: restrict]
 Ref: FichaPrecificacao.IdEquipamento > Equipamento.IdEquipamento [delete: restrict]
 Ref: FichaPrecificacao.IdTarifaEnergia > TarifaEnergia.IdTarifaEnergia [delete: restrict]
 Ref: FichaPrecificacao.IdCustoMaoDeObra > CustoMaoDeObra.IdCustoMaoDeObra [delete: restrict]

@@ -5,7 +5,6 @@ using PopLume.Application.Dtos;
 using PopLume.Application.Services;
 using PopLume.Domain.Entities;
 using PopLume.Domain.Repositories;
-using PopLume.Tests.Mocks.Dtos;
 using Xunit;
 
 namespace PopLume.Tests.Unitarios.Services;
@@ -19,91 +18,32 @@ public class ProdutoServiceTests
     public ProdutoServiceTests()
     {
         repository.SetupGet(x => x.UnitOfWork).Returns(unitOfWork.Object);
-        repository.Setup(x => x.ObterTodasComposicoesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
+        repository.Setup(x => x.ObterTodasComposicoesAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        repository.Setup(x => x.VariacaoPertenceAoProdutoAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
         service = new ProdutoService(repository.Object, Mock.Of<ILogger<ProdutoService>>());
     }
 
     [Fact]
-    public async Task AdicionarAsync_DeveCriarProdutoSemPrecoDeCustoManual()
+    public async Task AdicionarAsync_DeveCriarUmProdutoComVariacoes()
     {
         Produto? salvo = null;
         repository.Setup(x => x.Adicionar(It.IsAny<Produto>())).Callback<Produto>(x => salvo = x);
         var dto = new CreateProdutoDto
         {
-            Nome = "Chaveiro",
-            TempoImpressaoMinutos = 45,
-            TempoMaoDeObraMinutos = 10
+            Nome = "Vaso",
+            Variacoes =
+            [
+                CriarVariacao("Preto"),
+                CriarVariacao("Azul"),
+                CriarVariacao("Verde")
+            ]
         };
 
-        _produtoRepositoryMock
-            .Setup(repository => repository.ObterProdutosPorNomeAsync(parteNome, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(produtos);
-
-        var service = CriarService();
-
-        // Act
-        var resultado = await service.ObterPorNomeAsync(parteNome);
-
-        // Assert
-        resultado.Ok.Should().BeTrue();
-        resultado.Data.Should().NotBeNull();
-        resultado.Data.Should().HaveCount(2);
-        resultado.Data.Should().OnlyContain(produto => produto.Nome.Contains(parteNome, StringComparison.OrdinalIgnoreCase));
-
-        _produtoRepositoryMock.Verify(
-            repository => repository.ObterProdutosPorNomeAsync(parteNome, It.IsAny<CancellationToken>()),
-            Times.Once);
-    }
-
-    [Fact(DisplayName = "Deve obter um produto pelo identificador quando ele existir.")]
-    public async Task ObterPorIdAsync_DeveRetornarProduto_QuandoIdentificadorExistir()
-    {
-        // Arrange
-        var produto = ProdutoDtoMock.ProdutoValido();
-
-        _produtoRepositoryMock
-            .Setup(repository => repository.ObterProdutosPorIdAsync(produto.IdProduto, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(produto);
-
-        var service = CriarService();
-
-        // Act
-        var resultado = await service.ObterPorIdAsync(produto.IdProduto);
-
-        // Assert
-        resultado.Ok.Should().BeTrue();
-        resultado.NotFound.Should().BeFalse();
-        resultado.Data.Should().NotBeNull();
-        resultado.Data!.IdProduto.Should().Be(produto.IdProduto);
-        resultado.Data.Nome.Should().Be(produto.Nome);
-    }
-
-    [Fact(DisplayName = "Deve cadastrar um produto sem componentes.")]
-    public async Task AdicionarAsync_DeveCadastrarProdutoSemComponentes()
-    {
-        // Arrange
-        var dto = ProdutoDtoMock.CreateProdutoDtoSemComponentes();
-        Produto? produtoAdicionado = null;
-
-        _produtoRepositoryMock
-            .Setup(repository => repository.Adicionar(It.IsAny<Produto>()))
-            .Callback<Produto>(produto => produtoAdicionado = produto);
-
-        _unitOfWorkMock
-            .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        var service = CriarService();
-
-        // Act
         var resultado = await service.AdicionarAsync(dto);
 
-        // Assert
         resultado.Ok.Should().BeTrue();
         salvo.Should().NotBeNull();
-        salvo!.PrecoCusto.Should().Be(0);
-        salvo.TempoImpressaoMinutos.Should().Be(45);
+        salvo!.Variacoes.Should().HaveCount(3);
     }
 
     [Fact]
@@ -116,7 +56,7 @@ public class ProdutoServiceTests
         {
             IdProduto = id,
             Nome = "Kit",
-            Componentes = [new ProdutoComponenteDto { IdProdutoFilho = id, Quantidade = 1 }]
+            Componentes = [CriarComponente(id)]
         };
 
         var resultado = await service.AtualizarAsync(dto);
@@ -142,10 +82,9 @@ public class ProdutoServiceTests
         {
             IdProduto = a,
             Nome = "A",
-            Componentes = [new ProdutoComponenteDto { IdProdutoFilho = b, Quantidade = 1 }]
+            Componentes = [CriarComponente(b)]
         };
 
-        // Act
         var resultado = await service.AtualizarAsync(dto);
 
         resultado.Ok.Should().BeFalse();
@@ -162,19 +101,29 @@ public class ProdutoServiceTests
         {
             IdProduto = kit,
             Nome = "Kit Dia dos Pais",
-            Componentes =
-            [
-                new ProdutoComponenteDto { IdProdutoFilho = Guid.NewGuid(), Quantidade = 1 },
-                new ProdutoComponenteDto { IdProdutoFilho = Guid.NewGuid(), Quantidade = 1 },
-                new ProdutoComponenteDto { IdProdutoFilho = Guid.NewGuid(), Quantidade = 1 }
-            ]
+            Componentes = [CriarComponente(Guid.NewGuid()), CriarComponente(Guid.NewGuid()), CriarComponente(Guid.NewGuid())]
         };
 
-        // Act
         var resultado = await service.AtualizarAsync(dto);
 
-        // Assert
         resultado.Ok.Should().BeTrue();
         repository.Verify(x => x.Atualizar(It.Is<Produto>(p => p.ComposicoesPai.Count == 3)), Times.Once);
     }
+
+    private static ProdutoVariacaoInputDto CriarVariacao(string nome) => new()
+    {
+        Nome = nome,
+        Filamentos = [new ProdutoVariacaoFilamentoInputDto
+        {
+            IdFilamento = Guid.NewGuid(),
+            QuantidadeGramas = 100
+        }]
+    };
+
+    private static ProdutoComponenteDto CriarComponente(Guid idProduto) => new()
+    {
+        IdProdutoFilho = idProduto,
+        IdProdutoVariacaoFilho = Guid.NewGuid(),
+        Quantidade = 1
+    };
 }

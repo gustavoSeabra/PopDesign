@@ -13,23 +13,31 @@ public class ProdutoRepository : BaseRepository<Produto>, IProdutoRepository
 
     public async Task<Produto?> ObterProdutosPorIdAsync(Guid idProduto, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Produto>()
-            .Include(p => p.Filamentos).ThenInclude(x => x.Filamento)
+            .Include(p => p.Variacoes).ThenInclude(x => x.Filamentos).ThenInclude(x => x.Filamento)
             .Include(p => p.Insumos).ThenInclude(x => x.Insumo)
             .Include(p => p.ComposicoesPai)
                 .ThenInclude(cp => cp.ProdutoFilho)
+            .Include(p => p.ComposicoesPai)
+                .ThenInclude(cp => cp.ProdutoVariacaoFilho)
             .FirstOrDefaultAsync(p => p.IdProduto == idProduto, cancellationToken);
 
     public async Task<Produto?> ObterParaPrecificacaoAsync(Guid idProduto, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Produto>()
             .Include(p => p.Equipamento)
-            .Include(p => p.Filamentos).ThenInclude(x => x.Filamento)
+            .Include(p => p.Variacoes).ThenInclude(x => x.Filamentos).ThenInclude(x => x.Filamento)
             .Include(p => p.Insumos).ThenInclude(x => x.Insumo)
             .Include(p => p.ComposicoesPai).ThenInclude(x => x.ProdutoFilho)
+            .Include(p => p.ComposicoesPai).ThenInclude(x => x.ProdutoVariacaoFilho)
             .AsTracking()
             .FirstOrDefaultAsync(p => p.IdProduto == idProduto, cancellationToken);
 
     public async Task<IEnumerable<ProdutoComposicao>> ObterTodasComposicoesAsync(CancellationToken cancellationToken = default) =>
         await dbContext.Set<ProdutoComposicao>().AsNoTracking().ToListAsync(cancellationToken);
+
+    public Task<bool> VariacaoPertenceAoProdutoAsync(Guid idProduto, Guid idProdutoVariacao, CancellationToken cancellationToken = default) =>
+        dbContext.Set<ProdutoVariacao>().AnyAsync(
+            x => x.IdProduto == idProduto && x.IdProdutoVariacao == idProdutoVariacao,
+            cancellationToken);
 
     public async Task<IEnumerable<Produto>> ObterProdutosPorNomeAsync(string nome, CancellationToken cancellationToken = default) =>
         await dbContext.Set<Produto>()

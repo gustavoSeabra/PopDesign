@@ -28,19 +28,33 @@ A combinação transmite bem produtos criativos, personalizados e impressão 3D.
 
 # Particularidades da loja
 
-No MVP, a única variação comercial do produto será a cor. Tamanho, material e demais características não poderão ser escolhidos pelo cliente. Abaixo a regra do produto:
+No MVP, a única variação comercial do produto será a cor. Tamanho, material e demais características não poderão ser escolhidos pelo cliente.
 
-- Cada produto terá uma ou mais cores disponíveis.
-- Cada cor estará associada a um filamento e a um preço.
-- A escolha da cor será obrigatória antes de adicionar o produto ao carrinho.
-- O produto poderá possuir imagens associadas a cada cor.
-- O mesmo produto em cores diferentes será tratado como itens distintos no carrinho.
+Um produto será cadastrado uma única vez e poderá possuir uma ou mais variações comerciais de cor. Não deverão ser criados cadastros duplicados do mesmo produto para representar cores diferentes.
+
+Cada variação:
+
+- Pertencerá a um único produto.
+- Terá um nome de cor apresentado ao cliente.
+- Poderá ser ativada ou inativada.
+- Estará associada a um ou mais filamentos.
+- Informará a quantidade em gramas de cada filamento utilizado.
+- Poderá informar um percentual de perda para cada filamento.
+- Poderá possuir imagens próprias.
+- Terá seu custo calculado de acordo com os filamentos utilizados.
+- Será tratada como um item distinto no carrinho.
+
+Os filamentos de uma variação representam a receita de fabricação daquela opção comercial. Um produto de uma única cor poderá ter variações alternativas, como preto, azul ou verde. Uma variação também poderá utilizar vários filamentos simultaneamente em produtos multicoloridos.
+
+A escolha da variação será obrigatória antes de adicionar o produto ao carrinho. A precificação será realizada para uma variação específica.
 
 O cliente não poderá enviar arquivos. Caso ele queira algum produto personalizado, deverá entrar em contato conosco a partir dos dados de contato informados na home page.
 
-Haverá um módulo de orçamento, onde o funcionário ou administrador irá selecionar o produto, equipamento, filamento e canal de venda (marketplaces) e o preço será calculado automaticamente. Ao final, o preço calculado será adicionado no registro do produto.
+Haverá um módulo de formação de preço, disponível para funcionário e administrador. O usuário selecionará o produto, sua variação, o equipamento, a margem, a quantidade produzida e, opcionalmente, o marketplace. O preço será calculado automaticamente.
 
-Filamentos serão usados apenas na produção e composição de preço do produto.
+Os filamentos não serão selecionados durante a precificação. O sistema carregará automaticamente os filamentos, quantidades e percentuais de perda vinculados à variação escolhida.
+
+Filamentos serão utilizados na produção e na composição do custo do produto. O custo por grama será calculado dividindo o valor de compra pelo peso líquido do filamento.
 
 Marketplaces servirão apenas para registrar canais de venda. No futuro, poderá ser considerada uma integração, mas ela não fará parte do MVP.
 
@@ -75,7 +89,11 @@ Abaixo uma tabela contendo os perfis e o que cada um pode fazer nesta etapa do p
 | Gerenciar Equipamentos | Não | Não | Sim |  Sim |
 | Gerenciar Filamentos | Não | Sim | Sim | Sim |
 | Gerenciar Marketplaces | Não | Não | Sim | Sim |
-| Gerenciar Orçamentos | Não | Sim | Sim | Sim |
+| Gerenciar Formação de Preço | Não | Sim | Sim | Sim |
+| Gerenciar Insumos | Não | Sim | Sim | Sim |
+| Gerenciar Tarifas de Energia | Não | Não | Sim | Sim |
+| Gerenciar Custos de Mão de Obra | Não | Não | Sim | Sim |
+| Consultar Histórico de Precificações | Não | Sim | Sim | Sim |
 | Gerenciar Banners (carrossel home) | Não | Sim | Sim | Sim |
 | Gerenciar Pedidos | Não | Sim | Sim | Não |
 | Gerenciar Newsletter | Não | Sim | Sim| Sim |
@@ -196,7 +214,7 @@ Regras da home page:
 
 ## Área administrativa
 
-Os primeiros módulos do sistema serão produtos, categorias de produtos, banners, equipamentos, filamentos, marketplaces, clientes e Newsletter contendo:
+Os primeiros módulos do sistema serão produtos, categorias de produtos, banners, equipamentos, filamentos, insumos, marketplaces e suas faixas de taxas, tarifas de energia, custos de mão de obra, formação de preço, histórico de precificações, clientes e Newsletter contendo:
 
 - Listagem
 - Busca e filtros
@@ -229,26 +247,221 @@ Validar se o domínio de `Produto` contem todos os campos abaixo, caso não tenh
 - Código interno
 - Cores disponíveis
   - Filamento associado
-  - Preço informado manualmente
+  - Quantidade utilizada em gramas
+  - Percentual de perda
+  - Custo calculado automaticamente
   - Uma ou mais imagens associadas
   - A primeira imagem adicionada, será a destaque
 
+### Ficha técnica e composição do produto
+
+O cadastro administrativo do produto deverá permitir definir sua ficha técnica de produção, contendo:
+
+- Equipamento padrão, quando aplicável.
+- Tempo de impressão em minutos.
+- Tempo de mão de obra em minutos.
+- Uma ou mais variações comerciais de cor.
+- Um ou mais filamentos por variação.
+- Quantidade consumida em gramas para cada filamento.
+- Percentual de perda para cada filamento.
+- Um ou mais insumos e suas quantidades consumidas.
+- Um ou mais produtos componentes, suas variações e quantidades.
+
+Os relacionamentos terão os seguintes significados:
+
+- `ProdutoVariacao`: opção comercial de cor do produto.
+- `ProdutoVariacaoFilamento`: matéria-prima utilizada para fabricar uma variação.
+- `ProdutoInsumo`: material comprado e consumido durante a produção ou embalagem.
+- `ProdutoComposicao`: outro produto e uma de suas variações que fazem parte do produto atual.
+
+Exemplos de insumos incluem argola, fita, plástico-bolha, sacola, caixa, tag e cola.
+
+Um produto composto poderá representar um kit, como um Kit Dia dos Pais formado por um chaveiro, um porta-retrato e um porta-celular.
+
+Um produto não poderá conter a si próprio, possuir a mesma variação de componente duplicada ou criar ciclos diretos ou indiretos de composição. A quantidade de um componente deverá ser maior que zero. Para ser utilizada no cálculo de outro produto, a variação do produto componente deverá possuir preço de custo previamente calculado.
+
 ## Módulo Formação de Preço
 
-O preço do produto se deve a várias informações previamente cadastradas. Sua fórmula ainda não foi finalizada. Mas algumas informações precisão estar previamente cadastradas.
+O módulo de formação de preço faz parte do MVP e será utilizado por funcionários e administradores. Seu objetivo será calcular o custo de produção e sugerir um preço de venda com base na ficha técnica da variação do produto, nos custos vigentes e no canal de venda.
 
-- O produto deve estar cadastrado
-- O equipamento deve estar cadastrado
-- O filamento deve estar cadastrado
-- O Marketplace deve estar cadastrado
+### Pré-requisitos
 
-O cálculo considera tempo de impressão, consumo de filamento, energia, margem, comissão do marketplace e preço dos produtos filhos vinculados ao produto principal.
+Antes de realizar uma precificação:
 
-Ao final do orçamento, deve exibir uma mensagem de confirmação perguntando se quer atualizar o preço do produto.
+- O produto e sua variação deverão estar cadastrados.
+- O equipamento deverá estar cadastrado.
+- Os filamentos utilizados deverão estar vinculados à variação.
+- Os insumos utilizados deverão estar vinculados ao produto.
+- As variações dos produtos componentes deverão possuir preço de custo calculado.
+- Deverá existir uma tarifa de energia vigente.
+- Deverá existir um custo de mão de obra vigente.
+- Caso seja uma venda por marketplace, suas faixas de taxas deverão estar cadastradas.
+
+### Informações selecionadas na precificação
+
+O funcionário ou administrador deverá:
+
+- Selecionar o produto.
+- Selecionar a variação comercial de cor.
+- Selecionar o equipamento.
+- Informar a margem percentual desejada.
+- Informar a quantidade produzida no lote.
+- Selecionar opcionalmente o marketplace.
+
+Os filamentos não serão selecionados durante a precificação. O sistema utilizará automaticamente os filamentos e quantidades definidos na variação escolhida.
+
+### Componentes do custo
+
+O cálculo deverá considerar:
+
+- Custo dos filamentos da variação.
+- Percentual de perda dos filamentos.
+- Custo dos insumos.
+- Custo dos produtos componentes.
+- Custo de energia.
+- Custo de depreciação do equipamento.
+- Custo de mão de obra.
+- Quantidade produzida no lote.
+- Margem desejada.
+- Comissão percentual do marketplace.
+- Taxa fixa do marketplace.
+
+### Custo dos filamentos
+
+O custo por grama será calculado por:
+
+`Custo por grama = Valor de compra do filamento / Peso líquido em gramas`
+
+O custo de cada filamento na variação será:
+
+`Quantidade com perda = Quantidade em gramas × (1 + Percentual de perda / 100)`
+
+`Custo do filamento = Quantidade com perda × Custo por grama`
+
+O custo total dos filamentos será a soma dos custos de todos os filamentos vinculados à variação.
+
+### Custo dos insumos
+
+Cada insumo deverá possuir valor da compra, quantidade comprada e unidade de medida.
+
+`Custo unitário do insumo = Valor da compra / Quantidade comprada`
+
+`Custo utilizado = Quantidade utilizada × Custo unitário`
+
+A unidade utilizada no produto deverá ser compatível com a unidade cadastrada no insumo.
+
+### Custo de energia
+
+A potência do equipamento será armazenada em watts e o tempo de impressão em minutos.
+
+`Horas de impressão = Tempo de impressão em minutos / 60`
+
+`Consumo em kWh = Potência em watts × Horas de impressão / 1.000`
+
+`Custo de energia = Consumo em kWh × Valor vigente do kWh`
+
+As tarifas de energia deverão possuir período de vigência. Não poderão existir períodos sobrepostos.
+
+### Custo do equipamento
+
+A vida útil do equipamento será armazenada em horas.
+
+`Custo de depreciação por hora = Valor de compra / Vida útil em horas`
+
+`Custo do equipamento = Horas de impressão × Custo de depreciação por hora`
+
+O custo de depreciação não representa o consumo de energia.
+
+### Custo de mão de obra
+
+O tempo de mão de obra será independente do tempo de impressão.
+
+`Horas de mão de obra = Tempo de mão de obra em minutos / 60`
+
+`Custo de mão de obra = Horas de mão de obra × Valor vigente da mão de obra por hora`
+
+Os valores de mão de obra deverão possuir período de vigência. Não poderão existir períodos sobrepostos.
+
+### Produtos componentes
+
+`Custo dos componentes = Soma da quantidade de cada componente × preço de custo vigente da variação selecionada`
+
+A variação de um produto componente deverá possuir preço de custo calculado antes de ser utilizada na precificação do produto pai. O sistema deverá impedir composições cíclicas, incluindo ciclos diretos e indiretos.
+
+### Produção em lote
+
+`Custo unitário = Custo total do lote / Quantidade produzida`
+
+A quantidade produzida deverá ser maior que zero.
+
+### Marketplace
+
+A seleção de marketplace será opcional. Quando nenhum marketplace for selecionado, a comissão e a taxa fixa serão zero.
+
+Cada marketplace poderá possuir faixas contendo valor inicial, valor final opcional, comissão percentual e taxa fixa. Um valor final nulo representará uma faixa sem limite superior. As faixas de um mesmo marketplace não poderão se sobrepor.
+
+O sistema deverá calcular o preço com cada faixa candidata e selecionar aquela que contenha o preço final resultante.
+
+### Fórmula do preço de venda
+
+Para venda sem marketplace:
+
+`Preço de venda = Custo unitário / (1 - Margem)`
+
+Para venda com marketplace:
+
+`Preço de venda = (Custo unitário + Taxa fixa) / (1 - Margem - Comissão)`
+
+Margem e comissão serão informadas como percentuais entre 0 e 100. A soma da margem e da comissão deverá ser menor que 100%.
+
+### Resultado
+
+A precificação deverá apresentar:
+
+- Variação precificada.
+- Custo dos filamentos.
+- Custo dos insumos.
+- Custo dos produtos componentes.
+- Custo de energia.
+- Custo do equipamento.
+- Custo de mão de obra.
+- Custo total do lote.
+- Custo unitário.
+- Comissão do marketplace.
+- Taxa fixa.
+- Lucro unitário.
+- Preço de venda sugerido.
+
+Os custos intermediários deverão preservar precisão decimal. O preço final será arredondado para duas casas decimais.
+
+### Simulação e confirmação
+
+O usuário poderá simular uma precificação antes de confirmá-la. A simulação não atualizará o produto, não atualizará a variação e não criará histórico.
+
+Após a simulação, o sistema deverá solicitar confirmação. Quando confirmada, a precificação:
+
+- Criará uma ficha de precificação.
+- Armazenará os dados e valores utilizados.
+- Atualizará o preço de custo vigente da variação.
+- Manterá o preço de venda na ficha de precificação.
+
+### Histórico
+
+Cada precificação confirmada deverá gerar uma ficha histórica imutável, associada ao produto e à variação precificada.
+
+A ficha deverá armazenar produto, variação, equipamento, tarifa de energia, custo de mão de obra, marketplace e faixa utilizados, data e hora do cálculo, margem, quantidade produzida, custos detalhados, custo unitário, comissão, taxa fixa, lucro unitário e preço de venda.
+
+Alterações posteriores nos cadastros não deverão alterar fichas anteriores. O histórico de precificações deverá estar disponível para consulta por funcionários e administradores.
 
 ### Importante!
 
-O módulo de formação de preço não faz parte da primeira entrega do MVP. Enquanto sua fórmula não estiver definida, os preços serão cadastrados manualmente para cada cor do produto.
+O módulo de formação de preço faz parte do MVP.
+
+O preço de custo da variação não será informado manualmente. Ele será atualizado somente após a confirmação de uma precificação.
+
+As cores e quantidades de filamento utilizadas na produção serão cadastradas na variação do produto. O custo correspondente será calculado automaticamente a partir do valor por grama de cada filamento.
+
+O preço de venda calculado será armazenado na ficha de precificação, pois poderá variar conforme a margem, o marketplace e as taxas aplicáveis.
 
 ## Módulo Newsletter e LGPD
 

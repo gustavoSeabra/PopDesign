@@ -31,7 +31,8 @@ public class PopLumeDbContext: DbContext, IUnitOfWork
     public DbSet<Marketplace> Marketplaces { get; set; }
     public DbSet<TaxasMarketplace> TaxasMarketplace { get; set; }
     public DbSet<Filamento> Filamentos { get; set; }
-    public DbSet<ProdutoFilamento> ProdutoFilamentos { get; set; }
+    public DbSet<ProdutoVariacao> ProdutoVariacoes { get; set; }
+    public DbSet<ProdutoVariacaoFilamento> ProdutoVariacaoFilamentos { get; set; }
     public DbSet<Insumo> Insumos { get; set; }
     public DbSet<ProdutoInsumo> ProdutoInsumos { get; set; }
     public DbSet<TarifaEnergia> TarifasEnergia { get; set; }

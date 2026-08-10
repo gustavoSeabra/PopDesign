@@ -1,14 +1,14 @@
 namespace PopLume.Domain.Entities;
 
-public class ProdutoFilamento
+public class ProdutoVariacaoFilamento
 {
-    public Guid IdProdutoFilamento { get; set; }
-    public Guid IdProduto { get; set; }
+    public Guid IdProdutoVariacaoFilamento { get; set; }
+    public Guid IdProdutoVariacao { get; set; }
     public Guid IdFilamento { get; set; }
     public decimal QuantidadeGramas { get; set; }
     public decimal PercentualPerda { get; set; }
 
-    public virtual Produto Produto { get; set; } = null!;
+    public virtual ProdutoVariacao ProdutoVariacao { get; set; } = null!;
     public virtual Filamento Filamento { get; set; } = null!;
 
     public decimal CalcularQuantidadeComPerda()

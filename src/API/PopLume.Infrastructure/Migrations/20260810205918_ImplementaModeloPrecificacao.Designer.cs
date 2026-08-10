@@ -12,7 +12,7 @@ using PopLume.Infrastructure.DataProvider.Context;
 namespace PopLume.Infrastructure.Migrations
 {
     [DbContext(typeof(PopLumeDbContext))]
-    [Migration("20260810195309_ImplementaModeloPrecificacao")]
+    [Migration("20260810205918_ImplementaModeloPrecificacao")]
     partial class ImplementaModeloPrecificacao
     {
         /// <inheritdoc />
@@ -153,6 +153,9 @@ namespace PopLume.Infrastructure.Migrations
                     b.Property<Guid>("IdProduto")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("IdProdutoVariacao")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("IdTarifaEnergia")
                         .HasColumnType("uuid");
 
@@ -195,6 +198,8 @@ namespace PopLume.Infrastructure.Migrations
                     b.HasIndex("IdTaxaMarketplace");
 
                     b.HasIndex("IdProduto", "CalculadaEmUtc");
+
+                    b.HasIndex("IdProdutoVariacao", "CalculadaEmUtc");
 
                     b.ToTable("FichaPrecificacao", (string)null);
                 });
@@ -352,10 +357,6 @@ namespace PopLume.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<decimal>("PrecoCusto")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
                     b.Property<int>("TempoImpressaoMinutos")
                         .HasColumnType("integer");
 
@@ -381,6 +382,9 @@ namespace PopLume.Infrastructure.Migrations
                     b.Property<Guid>("IdProdutoPai")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("IdProdutoVariacaoFilho")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Quantidade")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
@@ -390,40 +394,12 @@ namespace PopLume.Infrastructure.Migrations
 
                     b.HasIndex("IdProdutoFilho");
 
-                    b.HasIndex("IdProdutoPai", "IdProdutoFilho")
+                    b.HasIndex("IdProdutoVariacaoFilho");
+
+                    b.HasIndex("IdProdutoPai", "IdProdutoFilho", "IdProdutoVariacaoFilho")
                         .IsUnique();
 
                     b.ToTable("Produto_Composicao", (string)null);
-                });
-
-            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoFilamento", b =>
-                {
-                    b.Property<Guid>("IdProdutoFilamento")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("IdFilamento")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("IdProduto")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("PercentualPerda")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("numeric(5,2)");
-
-                    b.Property<decimal>("QuantidadeGramas")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("numeric(10,3)");
-
-                    b.HasKey("IdProdutoFilamento");
-
-                    b.HasIndex("IdFilamento");
-
-                    b.HasIndex("IdProduto", "IdFilamento")
-                        .IsUnique();
-
-                    b.ToTable("ProdutoFilamento", (string)null);
                 });
 
             modelBuilder.Entity("PopLume.Domain.Entities.ProdutoInsumo", b =>
@@ -450,6 +426,71 @@ namespace PopLume.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("ProdutoInsumo", (string)null);
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoVariacao", b =>
+                {
+                    b.Property<Guid>("IdProdutoVariacao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Ativa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("CodigoInterno")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("IdProduto")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("PrecoCusto")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.HasKey("IdProdutoVariacao");
+
+                    b.HasIndex("IdProduto", "Nome")
+                        .IsUnique();
+
+                    b.ToTable("ProdutoVariacao", (string)null);
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoVariacaoFilamento", b =>
+                {
+                    b.Property<Guid>("IdProdutoVariacaoFilamento")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IdFilamento")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IdProdutoVariacao")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("PercentualPerda")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<decimal>("QuantidadeGramas")
+                        .HasPrecision(10, 3)
+                        .HasColumnType("numeric(10,3)");
+
+                    b.HasKey("IdProdutoVariacaoFilamento");
+
+                    b.HasIndex("IdFilamento");
+
+                    b.HasIndex("IdProdutoVariacao", "IdFilamento")
+                        .IsUnique();
+
+                    b.ToTable("ProdutoVariacaoFilamento", (string)null);
                 });
 
             modelBuilder.Entity("PopLume.Domain.Entities.TarifaEnergia", b =>
@@ -532,6 +573,12 @@ namespace PopLume.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("PopLume.Domain.Entities.ProdutoVariacao", "ProdutoVariacao")
+                        .WithMany("FichasPrecificacao")
+                        .HasForeignKey("IdProdutoVariacao")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("PopLume.Domain.Entities.TarifaEnergia", "TarifaEnergia")
                         .WithMany()
                         .HasForeignKey("IdTarifaEnergia")
@@ -550,6 +597,8 @@ namespace PopLume.Infrastructure.Migrations
                     b.Navigation("Marketplace");
 
                     b.Navigation("Produto");
+
+                    b.Navigation("ProdutoVariacao");
 
                     b.Navigation("TarifaEnergia");
 
@@ -591,28 +640,17 @@ namespace PopLume.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProdutoFilho");
-
-                    b.Navigation("ProdutoPai");
-                });
-
-            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoFilamento", b =>
-                {
-                    b.HasOne("PopLume.Domain.Entities.Filamento", "Filamento")
-                        .WithMany("Produtos")
-                        .HasForeignKey("IdFilamento")
+                    b.HasOne("PopLume.Domain.Entities.ProdutoVariacao", "ProdutoVariacaoFilho")
+                        .WithMany()
+                        .HasForeignKey("IdProdutoVariacaoFilho")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("PopLume.Domain.Entities.Produto", "Produto")
-                        .WithMany("Filamentos")
-                        .HasForeignKey("IdProduto")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("ProdutoFilho");
 
-                    b.Navigation("Filamento");
+                    b.Navigation("ProdutoPai");
 
-                    b.Navigation("Produto");
+                    b.Navigation("ProdutoVariacaoFilho");
                 });
 
             modelBuilder.Entity("PopLume.Domain.Entities.ProdutoInsumo", b =>
@@ -634,6 +672,36 @@ namespace PopLume.Infrastructure.Migrations
                     b.Navigation("Produto");
                 });
 
+            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoVariacao", b =>
+                {
+                    b.HasOne("PopLume.Domain.Entities.Produto", "Produto")
+                        .WithMany("Variacoes")
+                        .HasForeignKey("IdProduto")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Produto");
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoVariacaoFilamento", b =>
+                {
+                    b.HasOne("PopLume.Domain.Entities.Filamento", "Filamento")
+                        .WithMany("Variacoes")
+                        .HasForeignKey("IdFilamento")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PopLume.Domain.Entities.ProdutoVariacao", "ProdutoVariacao")
+                        .WithMany("Filamentos")
+                        .HasForeignKey("IdProdutoVariacao")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Filamento");
+
+                    b.Navigation("ProdutoVariacao");
+                });
+
             modelBuilder.Entity("PopLume.Domain.Entities.TaxasMarketplace", b =>
                 {
                     b.HasOne("PopLume.Domain.Entities.Marketplace", "Marketplace")
@@ -652,7 +720,7 @@ namespace PopLume.Infrastructure.Migrations
 
             modelBuilder.Entity("PopLume.Domain.Entities.Filamento", b =>
                 {
-                    b.Navigation("Produtos");
+                    b.Navigation("Variacoes");
                 });
 
             modelBuilder.Entity("PopLume.Domain.Entities.Insumo", b =>
@@ -673,9 +741,16 @@ namespace PopLume.Infrastructure.Migrations
 
                     b.Navigation("FichasPrecificacao");
 
-                    b.Navigation("Filamentos");
-
                     b.Navigation("Insumos");
+
+                    b.Navigation("Variacoes");
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoVariacao", b =>
+                {
+                    b.Navigation("FichasPrecificacao");
+
+                    b.Navigation("Filamentos");
                 });
 #pragma warning restore 612, 618
         }

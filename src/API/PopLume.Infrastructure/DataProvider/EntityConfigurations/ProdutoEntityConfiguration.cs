@@ -12,7 +12,6 @@ public class ProdutoEntityConfiguration : IEntityTypeConfiguration<Produto>
         builder.HasKey(e => e.IdProduto);
         
         builder.Property(e => e.Nome).IsRequired().HasMaxLength(100);
-        builder.Property(e => e.PrecoCusto).HasPrecision(10, 2);
         builder.Property(e => e.TempoImpressaoMinutos);
         builder.Property(e => e.TempoMaoDeObraMinutos);
 

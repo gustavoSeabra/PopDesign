@@ -13,7 +13,7 @@ public static class ProdutoDtoMock
         Nome = Faker.Commerce.ProductName(),
         TempoImpressaoMinutos = 0,
         TempoMaoDeObraMinutos = 0,
-        Filamentos = [],
+        Variacoes = [],
         Insumos = [],
         Componentes = []
     };
@@ -32,7 +32,7 @@ public static class ProdutoDtoMock
         Nome = Faker.Commerce.ProductName(),
         TempoImpressaoMinutos = 0,
         TempoMaoDeObraMinutos = 0,
-        Filamentos = [],
+        Variacoes = [],
         Insumos = [],
         Componentes = []
     };
@@ -56,7 +56,6 @@ public static class ProdutoDtoMock
             TempoMaoDeObraMinutos = Faker.Random.Int(1, 60),
             ComposicoesPai = []
         };
-        produto.AtualizarPrecoCusto(Faker.Random.Decimal(10, 250));
         return produto;
     }
 
@@ -67,6 +66,7 @@ public static class ProdutoDtoMock
         Enumerable.Range(0, quantidade).Select(_ => new ProdutoComponenteDto
         {
             IdProdutoFilho = Guid.NewGuid(),
+            IdProdutoVariacaoFilho = Guid.NewGuid(),
             Quantidade = Faker.Random.Int(1, 10)
         }).ToList();
 }

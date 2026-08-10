@@ -4,6 +4,7 @@ public class FichaPrecificacao
 {
     public Guid IdFichaPrecificacao { get; set; }
     public Guid IdProduto { get; set; }
+    public Guid IdProdutoVariacao { get; set; }
     public Guid IdEquipamento { get; set; }
     public Guid IdTarifaEnergia { get; set; }
     public Guid IdCustoMaoDeObra { get; set; }
@@ -27,6 +28,7 @@ public class FichaPrecificacao
     public decimal PrecoVenda { get; set; }
 
     public virtual Produto Produto { get; set; } = null!;
+    public virtual ProdutoVariacao ProdutoVariacao { get; set; } = null!;
     public virtual Equipamento Equipamento { get; set; } = null!;
     public virtual TarifaEnergia TarifaEnergia { get; set; } = null!;
     public virtual CustoMaoDeObra ConfiguracaoMaoDeObra { get; set; } = null!;

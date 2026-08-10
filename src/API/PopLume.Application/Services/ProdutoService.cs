@@ -88,7 +88,10 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
             produto.TempoImpressaoMinutos = dto.TempoImpressaoMinutos ?? 0;
             produto.TempoMaoDeObraMinutos = dto.TempoMaoDeObraMinutos ?? 0;
             produto.IdEquipamento = dto.IdEquipamento;
-            ProdutoMapper.AplicarRelacionamentos(produto, dto.Filamentos, dto.Insumos, dto.Componentes);
+            var custosVariacoes = produto.Variacoes.ToDictionary(x => x.IdProdutoVariacao, x => x.PrecoCusto);
+            ProdutoMapper.AplicarRelacionamentos(produto, dto.Variacoes, dto.Insumos, dto.Componentes);
+            foreach (var variacao in produto.Variacoes.Where(x => custosVariacoes.ContainsKey(x.IdProdutoVariacao)))
+                variacao.AtualizarPrecoCusto(custosVariacoes[variacao.IdProdutoVariacao]);
 
             var erro = await ValidarComposicoesAsync(produto.IdProduto, produto.ComposicoesPai, cancellationToken);
             if (erro is not null)
@@ -118,6 +121,12 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
         {
             if (composicao.Quantidade <= 0)
                 return "A quantidade de um produto componente deve ser maior que zero.";
+
+            if (!await produtoRepository.VariacaoPertenceAoProdutoAsync(
+                    composicao.IdProdutoFilho,
+                    composicao.IdProdutoVariacaoFilho,
+                    cancellationToken))
+                return "A variação informada não pertence ao produto componente.";
 
             if (ValidadorCicloProduto.PossuiCiclo(idProduto, composicao.IdProdutoFilho, existentes))
                 return "A composição informada criaria um ciclo entre produtos.";

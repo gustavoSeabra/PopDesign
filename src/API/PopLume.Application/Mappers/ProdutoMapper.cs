@@ -7,23 +7,26 @@ public static class ProdutoMapper
 {
     public static ProdutoDto ToDto(this Produto produto) => new()
     {
-        if (produto == null) return null!;
-
-        return new ProdutoDto
-        {
         IdProduto = produto.IdProduto,
         Nome = produto.Nome,
-        PrecoCusto = produto.PrecoCusto,
         TempoImpressaoMinutos = produto.TempoImpressaoMinutos,
         TempoMaoDeObraMinutos = produto.TempoMaoDeObraMinutos,
         IdEquipamento = produto.IdEquipamento,
-        Filamentos = produto.Filamentos.Select(x => new ProdutoFilamentoDto
+        Variacoes = produto.Variacoes.Select(x => new ProdutoVariacaoDto
         {
-            IdFilamento = x.IdFilamento,
-            Cor = x.Filamento?.Cor ?? string.Empty,
-            QuantidadeGramas = x.QuantidadeGramas,
-            PercentualPerda = x.PercentualPerda,
-            Custo = x.Filamento is null ? 0 : x.CalcularCusto()
+            IdProdutoVariacao = x.IdProdutoVariacao,
+            Nome = x.Nome,
+            CodigoInterno = x.CodigoInterno,
+            Ativa = x.Ativa,
+            PrecoCusto = x.PrecoCusto,
+            Filamentos = x.Filamentos.Select(f => new ProdutoVariacaoFilamentoDto
+            {
+                IdFilamento = f.IdFilamento,
+                Cor = f.Filamento?.Cor ?? string.Empty,
+                QuantidadeGramas = f.QuantidadeGramas,
+                PercentualPerda = f.PercentualPerda,
+                Custo = f.Filamento is null ? 0 : f.CalcularCusto()
+            }).ToList()
         }).ToList(),
         Insumos = produto.Insumos.Select(x => new ProdutoInsumoDto
         {
@@ -37,10 +40,10 @@ public static class ProdutoMapper
             IdProdutoFilho = x.IdProdutoFilho,
             Nome = x.ProdutoFilho?.Nome ?? string.Empty,
             Quantidade = x.Quantidade,
-            PrecoCustoUnitario = x.ProdutoFilho?.PrecoCusto ?? 0
+            IdProdutoVariacaoFilho = x.IdProdutoVariacaoFilho,
+            PrecoCustoUnitario = x.ProdutoVariacaoFilho?.PrecoCusto ?? 0
         }).ToList()
     };
-    }
 
     public static Produto ToEntity(this CreateProdutoDto dto)
     {
@@ -52,21 +55,32 @@ public static class ProdutoMapper
             IdEquipamento = dto.IdEquipamento
         };
 
-        AplicarRelacionamentos(produto, dto.Filamentos, dto.Insumos, dto.Componentes);
+        AplicarRelacionamentos(produto, dto.Variacoes, dto.Insumos, dto.Componentes);
         return produto;
     }
 
     public static void AplicarRelacionamentos(
         Produto produto,
-        IEnumerable<ProdutoFilamentoInputDto>? filamentos,
+        IEnumerable<ProdutoVariacaoInputDto>? variacoes,
         IEnumerable<ProdutoInsumoInputDto>? insumos,
         IEnumerable<ProdutoComponenteDto>? componentes)
     {
-        produto.Filamentos = filamentos?.Select(x => new ProdutoFilamento
+        produto.Variacoes = variacoes?.Select(x =>
         {
-            IdFilamento = x.IdFilamento,
-            QuantidadeGramas = x.QuantidadeGramas,
-            PercentualPerda = x.PercentualPerda
+            var variacao = new ProdutoVariacao
+            {
+                IdProdutoVariacao = x.IdProdutoVariacao,
+                Nome = x.Nome,
+                CodigoInterno = x.CodigoInterno,
+                Ativa = x.Ativa,
+                Filamentos = x.Filamentos.Select(f => new ProdutoVariacaoFilamento
+                {
+                    IdFilamento = f.IdFilamento,
+                    QuantidadeGramas = f.QuantidadeGramas,
+                    PercentualPerda = f.PercentualPerda
+                }).ToList()
+            };
+            return variacao;
         }).ToList() ?? [];
 
         produto.Insumos = insumos?.Select(x => new ProdutoInsumo
@@ -78,6 +92,7 @@ public static class ProdutoMapper
         produto.ComposicoesPai = componentes?.Select(x => new ProdutoComposicao
         {
             IdProdutoFilho = x.IdProdutoFilho,
+            IdProdutoVariacaoFilho = x.IdProdutoVariacaoFilho,
             Quantidade = x.Quantidade
         }).ToList() ?? [];
     }

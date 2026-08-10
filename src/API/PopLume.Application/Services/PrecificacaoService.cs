@@ -41,6 +41,12 @@ public class PrecificacaoService(
             if (produto is null)
                 return ResultadoDto<PrecificacaoDto>.RetornaNaoEncontrado("Produto não encontrado.");
 
+            var variacao = produto.Variacoes.FirstOrDefault(x => x.IdProdutoVariacao == dto.IdProdutoVariacao);
+            if (variacao is null)
+                return ResultadoDto<PrecificacaoDto>.RetornaNaoEncontrado("Variação do produto não encontrada.");
+            if (!variacao.Ativa)
+                return ResultadoDto<PrecificacaoDto>.RetornaErro("A variação selecionada está inativa.");
+
             var equipamento = await equipamentoRepository.ObterEquipamentosPorIdAsync(dto.IdEquipamento, cancellationToken);
             if (equipamento is null)
                 return ResultadoDto<PrecificacaoDto>.RetornaNaoEncontrado("Equipamento não encontrado.");
@@ -54,7 +60,7 @@ public class PrecificacaoService(
             if (maoDeObra is null)
                 return ResultadoDto<PrecificacaoDto>.RetornaErro("Não existe custo de mão de obra vigente.");
 
-            var filamentos = produto.Filamentos.Select(x => new ItemCusto(
+            var filamentos = variacao.Filamentos.Select(x => new ItemCusto(
                 $"Filamento {x.Filamento.Cor}",
                 x.CalcularQuantidadeComPerda(),
                 x.Filamento.CalcularCustoPorGrama())).ToArray();
@@ -63,14 +69,14 @@ public class PrecificacaoService(
                 x.QuantidadeUtilizada,
                 x.Insumo.CalcularCustoUnitario())).ToArray();
 
-            var componenteSemCusto = produto.ComposicoesPai.FirstOrDefault(x => x.ProdutoFilho.PrecoCusto <= 0);
+            var componenteSemCusto = produto.ComposicoesPai.FirstOrDefault(x => x.ProdutoVariacaoFilho.PrecoCusto <= 0);
             if (componenteSemCusto is not null)
-                return ResultadoDto<PrecificacaoDto>.RetornaErro($"O componente '{componenteSemCusto.ProdutoFilho.Nome}' ainda não possui custo calculado.");
+                return ResultadoDto<PrecificacaoDto>.RetornaErro($"A variação '{componenteSemCusto.ProdutoVariacaoFilho.Nome}' do componente '{componenteSemCusto.ProdutoFilho.Nome}' ainda não possui custo calculado.");
 
             var componentes = produto.ComposicoesPai.Select(x => new ItemCusto(
-                x.ProdutoFilho.Nome,
+                $"{x.ProdutoFilho.Nome} - {x.ProdutoVariacaoFilho.Nome}",
                 x.Quantidade,
-                x.ProdutoFilho.PrecoCusto)).ToArray();
+                x.ProdutoVariacaoFilho.PrecoCusto)).ToArray();
 
             var parametrosBase = new ParametrosPrecificacao(
                 filamentos,
@@ -107,14 +113,14 @@ public class PrecificacaoService(
             FichaPrecificacao? ficha = null;
             if (persistir)
             {
-                ficha = CriarFicha(produto, equipamento, tarifaEnergia, maoDeObra, marketplace, taxaSelecionada, dto, resultado, filamentos, insumos, componentes);
-                produto.AtualizarPrecoCusto(resultado.CustoUnitario);
+                ficha = CriarFicha(produto, variacao, equipamento, tarifaEnergia, maoDeObra, marketplace, taxaSelecionada, dto, resultado, filamentos, insumos, componentes);
+                variacao.AtualizarPrecoCusto(resultado.CustoUnitario);
                 fichaRepository.Adicionar(ficha);
                 produtoRepository.Atualizar(produto);
                 await fichaRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
             }
 
-            return ResultadoDto<PrecificacaoDto>.RetornaSucesso(Mapear(resultado, produto.IdProduto, ficha));
+            return ResultadoDto<PrecificacaoDto>.RetornaSucesso(Mapear(resultado, produto.IdProduto, variacao, ficha));
         }
         catch (Exception ex)
         {
@@ -125,6 +131,7 @@ public class PrecificacaoService(
 
     private static FichaPrecificacao CriarFicha(
         Produto produto,
+        ProdutoVariacao variacao,
         Equipamento equipamento,
         TarifaEnergia tarifa,
         CustoMaoDeObra maoDeObra,
@@ -139,6 +146,7 @@ public class PrecificacaoService(
         var ficha = new FichaPrecificacao
         {
             IdProduto = produto.IdProduto,
+            IdProdutoVariacao = variacao.IdProdutoVariacao,
             IdEquipamento = equipamento.IdEquipamento,
             IdTarifaEnergia = tarifa.IdTarifaEnergia,
             IdCustoMaoDeObra = maoDeObra.IdCustoMaoDeObra,
@@ -202,10 +210,12 @@ public class PrecificacaoService(
         ValorTotal = quantidade * valorUnitario
     };
 
-    private static PrecificacaoDto Mapear(ResultadoPrecificacao x, Guid idProduto, FichaPrecificacao? ficha) => new()
+    private static PrecificacaoDto Mapear(ResultadoPrecificacao x, Guid idProduto, ProdutoVariacao variacao, FichaPrecificacao? ficha) => new()
     {
         IdFichaPrecificacao = ficha?.IdFichaPrecificacao,
         IdProduto = idProduto,
+        IdProdutoVariacao = variacao.IdProdutoVariacao,
+        VariacaoNome = variacao.Nome,
         CalculadaEmUtc = ficha?.CalculadaEmUtc,
         CustoFilamentos = x.CustoFilamentos,
         CustoInsumos = x.CustoInsumos,
@@ -225,6 +235,8 @@ public class PrecificacaoService(
     {
         IdFichaPrecificacao = x.IdFichaPrecificacao,
         IdProduto = x.IdProduto,
+        IdProdutoVariacao = x.IdProdutoVariacao,
+        VariacaoNome = x.ProdutoVariacao?.Nome ?? string.Empty,
         CalculadaEmUtc = x.CalculadaEmUtc,
         CustoFilamentos = x.CustoFilamentos,
         CustoInsumos = x.CustoInsumos,

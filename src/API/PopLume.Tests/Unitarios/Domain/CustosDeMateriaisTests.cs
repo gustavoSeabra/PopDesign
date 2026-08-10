@@ -15,15 +15,25 @@ public class CustosDeMateriaisTests
     }
 
     [Fact]
-    public void ProdutoFilamento_DeveConsiderarPerda()
+    public void ProdutoVariacaoFilamento_DeveConsiderarPerda()
     {
-        var uso = new ProdutoFilamento
+        var uso = new ProdutoVariacaoFilamento
         {
             QuantidadeGramas = 100,
             PercentualPerda = 5,
             Filamento = new Filamento { ValorCompra = 100, PesoLiquidoGramas = 1000 }
         };
         uso.CalcularCusto().Should().Be(10.5m);
+    }
+
+    [Fact]
+    public void ProdutoVariacao_DeveManterCustoProprio()
+    {
+        var variacao = new ProdutoVariacao { Nome = "Azul" };
+
+        variacao.AtualizarPrecoCusto(12.50m);
+
+        variacao.PrecoCusto.Should().Be(12.50m);
     }
 
     [Fact]
@@ -44,10 +54,10 @@ public class CustosDeMateriaisTests
     }
 
     [Fact]
-    public void Produto_DeveImpedirCustoNegativo()
+    public void ProdutoVariacao_DeveImpedirCustoNegativo()
     {
-        var produto = new Produto();
-        var acao = () => produto.AtualizarPrecoCusto(-1);
+        var variacao = new ProdutoVariacao();
+        var acao = () => variacao.AtualizarPrecoCusto(-1);
         acao.Should().Throw<ArgumentOutOfRangeException>();
     }
 }

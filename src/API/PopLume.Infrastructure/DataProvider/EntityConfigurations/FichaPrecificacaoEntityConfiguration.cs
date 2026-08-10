@@ -25,8 +25,11 @@ public class FichaPrecificacaoEntityConfiguration : IEntityTypeConfiguration<Fic
         builder.Property(x => x.LucroUnitario).HasPrecision(14, 4);
         builder.Property(x => x.PrecoVenda).HasPrecision(10, 2);
         builder.HasIndex(x => new { x.IdProduto, x.CalculadaEmUtc });
+        builder.HasIndex(x => new { x.IdProdutoVariacao, x.CalculadaEmUtc });
         builder.HasOne(x => x.Produto).WithMany(x => x.FichasPrecificacao)
             .HasForeignKey(x => x.IdProduto).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(x => x.ProdutoVariacao).WithMany(x => x.FichasPrecificacao)
+            .HasForeignKey(x => x.IdProdutoVariacao).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.Equipamento).WithMany()
             .HasForeignKey(x => x.IdEquipamento).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(x => x.TarifaEnergia).WithMany()

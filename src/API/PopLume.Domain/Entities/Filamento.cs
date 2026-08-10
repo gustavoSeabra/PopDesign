@@ -11,7 +11,7 @@ public class Filamento
     public TipoFilamento Tipo { get; set; }
     public DateOnly DataCompra { get; set; }
 
-    public virtual ICollection<ProdutoFilamento> Produtos { get; set; } = new List<ProdutoFilamento>();
+    public virtual ICollection<ProdutoVariacaoFilamento> Variacoes { get; set; } = new List<ProdutoVariacaoFilamento>();
 
     public decimal CalcularCustoPorGrama()
     {

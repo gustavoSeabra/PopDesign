@@ -9,4 +9,5 @@ public interface IProdutoRepository : IRepository<Produto>
     Task<Produto?> ObterProdutosPorIdAsync(Guid idProduto, CancellationToken cancellationToken = default);
     Task<Produto?> ObterParaPrecificacaoAsync(Guid idProduto, CancellationToken cancellationToken = default);
     Task<IEnumerable<ProdutoComposicao>> ObterTodasComposicoesAsync(CancellationToken cancellationToken = default);
+    Task<bool> VariacaoPertenceAoProdutoAsync(Guid idProduto, Guid idProdutoVariacao, CancellationToken cancellationToken = default);
 }

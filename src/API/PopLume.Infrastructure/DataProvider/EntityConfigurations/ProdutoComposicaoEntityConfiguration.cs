@@ -26,6 +26,12 @@ public class ProdutoComposicaoEntityConfiguration : IEntityTypeConfiguration<Pro
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
-        builder.HasIndex(pc => new { pc.IdProdutoPai, pc.IdProdutoFilho }).IsUnique();
+        builder.HasOne(pc => pc.ProdutoVariacaoFilho)
+            .WithMany()
+            .HasForeignKey(pc => pc.IdProdutoVariacaoFilho)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+
+        builder.HasIndex(pc => new { pc.IdProdutoPai, pc.IdProdutoFilho, pc.IdProdutoVariacaoFilho }).IsUnique();
     }
 }

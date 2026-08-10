@@ -3,6 +3,7 @@ namespace PopLume.Application.Dtos;
 public class CalcularPrecificacaoDto
 {
     public Guid IdEquipamento { get; set; }
+    public Guid IdProdutoVariacao { get; set; }
     public Guid? IdMarketplace { get; set; }
     public decimal MargemPercentual { get; set; }
     public int QuantidadeProduzida { get; set; } = 1;
@@ -12,6 +13,8 @@ public class PrecificacaoDto
 {
     public Guid? IdFichaPrecificacao { get; set; }
     public Guid IdProduto { get; set; }
+    public Guid IdProdutoVariacao { get; set; }
+    public string VariacaoNome { get; set; } = string.Empty;
     public DateTime? CalculadaEmUtc { get; set; }
     public decimal CustoFilamentos { get; set; }
     public decimal CustoInsumos { get; set; }

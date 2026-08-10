@@ -8,6 +8,7 @@ public class CalcularPrecificacaoValidator : AbstractValidator<CalcularPrecifica
     public CalcularPrecificacaoValidator()
     {
         RuleFor(x => x.IdEquipamento).NotEmpty();
+        RuleFor(x => x.IdProdutoVariacao).NotEmpty();
         RuleFor(x => x.MargemPercentual).InclusiveBetween(0, 99.99m);
         RuleFor(x => x.QuantidadeProduzida).GreaterThan(0);
     }
