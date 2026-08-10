@@ -22,6 +22,29 @@ namespace PopLume.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("PopLume.Domain.Entities.CustoMaoDeObra", b =>
+                {
+                    b.Property<Guid>("IdCustoMaoDeObra")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly?>("FimVigencia")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("InicioVigencia")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("ValorHora")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.HasKey("IdCustoMaoDeObra");
+
+                    b.HasIndex("InicioVigencia");
+
+                    b.ToTable("CustoMaoDeObra", (string)null);
+                });
+
             modelBuilder.Entity("PopLume.Domain.Entities.Equipamento", b =>
                 {
                     b.Property<Guid>("IdEquipamento")
@@ -32,6 +55,12 @@ namespace PopLume.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("CustoDepreciacaoHora")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasComputedColumnSql("CASE WHEN \"VidaUtilHoras\" > 0 THEN \"ValorCompra\" / \"VidaUtilHoras\" ELSE 0 END", true);
 
                     b.Property<DateOnly>("DataCompra")
                         .HasColumnType("date");
@@ -52,22 +81,122 @@ namespace PopLume.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<int>("Potencia")
+                    b.Property<int>("PotenciaWatts")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("ValorCompra")
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
 
-                    b.Property<decimal>("ValorHora")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)")
-                        .HasComputedColumnSql("CASE WHEN \"ExpectativaVida\" > 0 THEN \"ValorCompra\" / \"ExpectativaVida\" ELSE 0 END", true);
+                    b.Property<int>("VidaUtilHoras")
+                        .HasColumnType("integer");
 
                     b.HasKey("IdEquipamento");
 
                     b.ToTable("Equipamento", (string)null);
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.FichaPrecificacao", b =>
+                {
+                    b.Property<Guid>("IdFichaPrecificacao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CalculadaEmUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("ComissaoPercentual")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<decimal>("CustoComponentes")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<decimal>("CustoEnergia")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<decimal>("CustoEquipamento")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<decimal>("CustoFilamentos")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<decimal>("CustoInsumos")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<decimal>("CustoMaoDeObra")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<decimal>("CustoTotalLote")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<decimal>("CustoUnitario")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<Guid>("IdCustoMaoDeObra")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IdEquipamento")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("IdMarketplace")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IdProduto")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IdTarifaEnergia")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("IdTaxaMarketplace")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("LucroUnitario")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<decimal>("MargemPercentual")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<decimal>("PrecoVenda")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<int>("QuantidadeProduzida")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TaxaFixa")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<decimal>("ValorComissao")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.HasKey("IdFichaPrecificacao");
+
+                    b.HasIndex("IdCustoMaoDeObra");
+
+                    b.HasIndex("IdEquipamento");
+
+                    b.HasIndex("IdMarketplace");
+
+                    b.HasIndex("IdTarifaEnergia");
+
+                    b.HasIndex("IdTaxaMarketplace");
+
+                    b.HasIndex("IdProduto", "CalculadaEmUtc");
+
+                    b.ToTable("FichaPrecificacao", (string)null);
                 });
 
             modelBuilder.Entity("PopLume.Domain.Entities.Filamento", b =>
@@ -84,16 +213,16 @@ namespace PopLume.Infrastructure.Migrations
                     b.Property<DateOnly>("DataCompra")
                         .HasColumnType("date");
 
-                    b.Property<decimal>("Peso")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
+                    b.Property<decimal>("PesoLiquidoGramas")
+                        .HasPrecision(10, 3)
+                        .HasColumnType("numeric(10,3)");
 
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
-                    b.Property<decimal>("Valor")
+                    b.Property<decimal>("ValorCompra")
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
 
@@ -103,6 +232,81 @@ namespace PopLume.Infrastructure.Migrations
                         {
                             t.HasCheckConstraint("CK_Filamento_Tipo", "\"Tipo\" IN ('ABS', 'PETG', 'PLA', 'TPU')");
                         });
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.Insumo", b =>
+                {
+                    b.Property<Guid>("IdInsumo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("DataExclusao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Excluido")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<decimal>("QuantidadeComprada")
+                        .HasPrecision(12, 4)
+                        .HasColumnType("numeric(12,4)");
+
+                    b.Property<string>("UnidadeMedida")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("ValorCompra")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.HasKey("IdInsumo");
+
+                    b.ToTable("Insumo", (string)null);
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.ItemFichaPrecificacao", b =>
+                {
+                    b.Property<Guid>("IdItemFichaPrecificacao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("IdFichaPrecificacao")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Quantidade")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<decimal>("ValorTotal")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.Property<decimal>("ValorUnitario")
+                        .HasPrecision(14, 4)
+                        .HasColumnType("numeric(14,4)");
+
+                    b.HasKey("IdItemFichaPrecificacao");
+
+                    b.HasIndex("IdFichaPrecificacao");
+
+                    b.ToTable("ItemFichaPrecificacao", (string)null);
                 });
 
             modelBuilder.Entity("PopLume.Domain.Entities.Marketplace", b =>
@@ -140,6 +344,9 @@ namespace PopLume.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("IdEquipamento")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -149,14 +356,15 @@ namespace PopLume.Infrastructure.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
 
-                    b.Property<decimal>("QuantidadeFilamento")
-                        .HasPrecision(8, 2)
-                        .HasColumnType("numeric(8,2)");
+                    b.Property<int>("TempoImpressaoMinutos")
+                        .HasColumnType("integer");
 
-                    b.Property<int>("TempoImpressao")
+                    b.Property<int>("TempoMaoDeObraMinutos")
                         .HasColumnType("integer");
 
                     b.HasKey("IdProduto");
+
+                    b.HasIndex("IdEquipamento");
 
                     b.ToTable("Produto", (string)null);
                 });
@@ -167,10 +375,10 @@ namespace PopLume.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("IdProdutoFilho")
+                    b.Property<Guid>("IdProdutoFilho")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("IdProdutoPai")
+                    b.Property<Guid>("IdProdutoPai")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Quantidade")
@@ -188,13 +396,92 @@ namespace PopLume.Infrastructure.Migrations
                     b.ToTable("Produto_Composicao", (string)null);
                 });
 
+            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoFilamento", b =>
+                {
+                    b.Property<Guid>("IdProdutoFilamento")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IdFilamento")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IdProduto")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("PercentualPerda")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<decimal>("QuantidadeGramas")
+                        .HasPrecision(10, 3)
+                        .HasColumnType("numeric(10,3)");
+
+                    b.HasKey("IdProdutoFilamento");
+
+                    b.HasIndex("IdFilamento");
+
+                    b.HasIndex("IdProduto", "IdFilamento")
+                        .IsUnique();
+
+                    b.ToTable("ProdutoFilamento", (string)null);
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoInsumo", b =>
+                {
+                    b.Property<Guid>("IdProdutoInsumo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IdInsumo")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IdProduto")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("QuantidadeUtilizada")
+                        .HasPrecision(12, 4)
+                        .HasColumnType("numeric(12,4)");
+
+                    b.HasKey("IdProdutoInsumo");
+
+                    b.HasIndex("IdInsumo");
+
+                    b.HasIndex("IdProduto", "IdInsumo")
+                        .IsUnique();
+
+                    b.ToTable("ProdutoInsumo", (string)null);
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.TarifaEnergia", b =>
+                {
+                    b.Property<Guid>("IdTarifaEnergia")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly?>("FimVigencia")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("InicioVigencia")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("ValorKwh")
+                        .HasPrecision(10, 4)
+                        .HasColumnType("numeric(10,4)");
+
+                    b.HasKey("IdTarifaEnergia");
+
+                    b.HasIndex("InicioVigencia");
+
+                    b.ToTable("TarifaEnergia", (string)null);
+                });
+
             modelBuilder.Entity("PopLume.Domain.Entities.TaxasMarketplace", b =>
                 {
                     b.Property<Guid>("IdTaxa")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("Comissao")
+                    b.Property<decimal>("ComissaoPercentual")
                         .HasPrecision(5, 2)
                         .HasColumnType("numeric(5,2)");
 
@@ -205,7 +492,7 @@ namespace PopLume.Infrastructure.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
 
-                    b.Property<decimal>("ValorFinal")
+                    b.Property<decimal?>("ValorFinal")
                         .HasPrecision(10, 2)
                         .HasColumnType("numeric(10,2)");
 
@@ -220,21 +507,131 @@ namespace PopLume.Infrastructure.Migrations
                     b.ToTable("TaxasMarketplace", (string)null);
                 });
 
+            modelBuilder.Entity("PopLume.Domain.Entities.FichaPrecificacao", b =>
+                {
+                    b.HasOne("PopLume.Domain.Entities.CustoMaoDeObra", "ConfiguracaoMaoDeObra")
+                        .WithMany()
+                        .HasForeignKey("IdCustoMaoDeObra")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PopLume.Domain.Entities.Equipamento", "Equipamento")
+                        .WithMany()
+                        .HasForeignKey("IdEquipamento")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PopLume.Domain.Entities.Marketplace", "Marketplace")
+                        .WithMany()
+                        .HasForeignKey("IdMarketplace")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PopLume.Domain.Entities.Produto", "Produto")
+                        .WithMany("FichasPrecificacao")
+                        .HasForeignKey("IdProduto")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PopLume.Domain.Entities.TarifaEnergia", "TarifaEnergia")
+                        .WithMany()
+                        .HasForeignKey("IdTarifaEnergia")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PopLume.Domain.Entities.TaxasMarketplace", "TaxaMarketplace")
+                        .WithMany()
+                        .HasForeignKey("IdTaxaMarketplace")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ConfiguracaoMaoDeObra");
+
+                    b.Navigation("Equipamento");
+
+                    b.Navigation("Marketplace");
+
+                    b.Navigation("Produto");
+
+                    b.Navigation("TarifaEnergia");
+
+                    b.Navigation("TaxaMarketplace");
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.ItemFichaPrecificacao", b =>
+                {
+                    b.HasOne("PopLume.Domain.Entities.FichaPrecificacao", "FichaPrecificacao")
+                        .WithMany("Itens")
+                        .HasForeignKey("IdFichaPrecificacao")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FichaPrecificacao");
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.Produto", b =>
+                {
+                    b.HasOne("PopLume.Domain.Entities.Equipamento", "Equipamento")
+                        .WithMany()
+                        .HasForeignKey("IdEquipamento")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Equipamento");
+                });
+
             modelBuilder.Entity("PopLume.Domain.Entities.ProdutoComposicao", b =>
                 {
                     b.HasOne("PopLume.Domain.Entities.Produto", "ProdutoFilho")
                         .WithMany("ComposicoesFilho")
                         .HasForeignKey("IdProdutoFilho")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("PopLume.Domain.Entities.Produto", "ProdutoPai")
                         .WithMany("ComposicoesPai")
                         .HasForeignKey("IdProdutoPai")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ProdutoFilho");
 
                     b.Navigation("ProdutoPai");
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoFilamento", b =>
+                {
+                    b.HasOne("PopLume.Domain.Entities.Filamento", "Filamento")
+                        .WithMany("Produtos")
+                        .HasForeignKey("IdFilamento")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PopLume.Domain.Entities.Produto", "Produto")
+                        .WithMany("Filamentos")
+                        .HasForeignKey("IdProduto")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Filamento");
+
+                    b.Navigation("Produto");
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.ProdutoInsumo", b =>
+                {
+                    b.HasOne("PopLume.Domain.Entities.Insumo", "Insumo")
+                        .WithMany("Produtos")
+                        .HasForeignKey("IdInsumo")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PopLume.Domain.Entities.Produto", "Produto")
+                        .WithMany("Insumos")
+                        .HasForeignKey("IdProduto")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Insumo");
+
+                    b.Navigation("Produto");
                 });
 
             modelBuilder.Entity("PopLume.Domain.Entities.TaxasMarketplace", b =>
@@ -248,6 +645,21 @@ namespace PopLume.Infrastructure.Migrations
                     b.Navigation("Marketplace");
                 });
 
+            modelBuilder.Entity("PopLume.Domain.Entities.FichaPrecificacao", b =>
+                {
+                    b.Navigation("Itens");
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.Filamento", b =>
+                {
+                    b.Navigation("Produtos");
+                });
+
+            modelBuilder.Entity("PopLume.Domain.Entities.Insumo", b =>
+                {
+                    b.Navigation("Produtos");
+                });
+
             modelBuilder.Entity("PopLume.Domain.Entities.Marketplace", b =>
                 {
                     b.Navigation("TaxasMarketplace");
@@ -258,6 +670,12 @@ namespace PopLume.Infrastructure.Migrations
                     b.Navigation("ComposicoesFilho");
 
                     b.Navigation("ComposicoesPai");
+
+                    b.Navigation("FichasPrecificacao");
+
+                    b.Navigation("Filamentos");
+
+                    b.Navigation("Insumos");
                 });
 #pragma warning restore 612, 618
         }

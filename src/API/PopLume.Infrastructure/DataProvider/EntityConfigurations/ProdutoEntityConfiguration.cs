@@ -13,7 +13,12 @@ public class ProdutoEntityConfiguration : IEntityTypeConfiguration<Produto>
         
         builder.Property(e => e.Nome).IsRequired().HasMaxLength(100);
         builder.Property(e => e.PrecoCusto).HasPrecision(10, 2);
-        builder.Property(e => e.QuantidadeFilamento).HasPrecision(8, 2);
-        builder.Property(e => e.TempoImpressao);
+        builder.Property(e => e.TempoImpressaoMinutos);
+        builder.Property(e => e.TempoMaoDeObraMinutos);
+
+        builder.HasOne(e => e.Equipamento)
+            .WithMany()
+            .HasForeignKey(e => e.IdEquipamento)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

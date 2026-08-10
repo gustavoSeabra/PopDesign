@@ -1,9 +1,10 @@
-using PopLume.Application.Dtos;
-using PopLume.Application.Services.Interfaces;
-using PopLume.Domain.Repositories;
-using PopLume.Domain.Entities;
-using PopLume.Application.Mappers;
 using Microsoft.Extensions.Logging;
+using PopLume.Application.Dtos;
+using PopLume.Application.Mappers;
+using PopLume.Application.Services.Interfaces;
+using PopLume.Domain.Entities;
+using PopLume.Domain.Precificacao;
+using PopLume.Domain.Repositories;
 
 namespace PopLume.Application.Services;
 
@@ -13,12 +14,8 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
     {
         try
         {
-            logger.LogInformation("Iniciando consulta de todos os produtos.");
-            
             var produtos = await produtoRepository.ObterTodosProdutosAsync(cancellationToken);
-            var dtos = produtos.Select(p => p.ToDto());
-            
-            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaSucesso(dtos);
+            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaSucesso(produtos.Select(x => x.ToDto()));
         }
         catch (Exception ex)
         {
@@ -31,22 +28,15 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
     {
         try
         {
-            logger.LogInformation("Buscando produto com ID: {ProdutoId}", id);
-
             var produto = await produtoRepository.ObterProdutosPorIdAsync(id, cancellationToken);
-            
-            if (produto == null)
-            {
-                logger.LogWarning("Produto {ProdutoId} não encontrado.", id);
-                return ResultadoDto<ProdutoDto?>.RetornaNaoEncontrado("Produto não encontrado");
-            }
-
-            return ResultadoDto<ProdutoDto?>.RetornaSucesso(produto.ToDto());
+            return produto is null
+                ? ResultadoDto<ProdutoDto?>.RetornaNaoEncontrado("Produto não encontrado.")
+                : ResultadoDto<ProdutoDto?>.RetornaSucesso(produto.ToDto());
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Erro ao buscar produto com ID: {ProdutoId}", id);
-            return ResultadoDto<ProdutoDto?>.RetornaErro($"Erro ao buscar os detalhes do produto {id}.");
+            logger.LogError(ex, "Erro ao buscar produto {ProdutoId}.", id);
+            return ResultadoDto<ProdutoDto?>.RetornaErro("Erro ao buscar o produto.");
         }
     }
 
@@ -54,16 +44,12 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
     {
         try
         {
-            logger.LogInformation("Pesquisando produtos pelo nome: {NomeBusca}", nome);
-
             var produtos = await produtoRepository.ObterProdutosPorNomeAsync(nome, cancellationToken);
-            var dtos = produtos.Select(p => p.ToDto());
-
-            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaSucesso(dtos);
+            return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaSucesso(produtos.Select(x => x.ToDto()));
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Erro ao pesquisar produtos pelo nome: {NomeBusca}", nome);
+            logger.LogError(ex, "Erro ao pesquisar produtos por nome.");
             return ResultadoDto<IEnumerable<ProdutoDto>>.RetornaErro("Erro ao realizar a busca por nome.");
         }
     }
@@ -72,18 +58,20 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
     {
         try
         {
-            logger.LogInformation("Tentando adicionar novo produto: {NomeProduto}", dto.Nome);
-
             var produto = dto.ToEntity();
+            produto.IdProduto = Guid.NewGuid();
+
+            var erro = await ValidarComposicoesAsync(produto.IdProduto, produto.ComposicoesPai, cancellationToken);
+            if (erro is not null)
+                return ResultadoDto<Guid>.RetornaErro(erro);
+
             produtoRepository.Adicionar(produto);
             await produtoRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-
-            logger.LogInformation("Produto criado com sucesso. ID: {ProdutoId}", produto.IdProduto);
             return ResultadoDto<Guid>.RetornaSucesso(produto.IdProduto);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Erro ao adicionar produto: {NomeProduto}", dto.Nome);
+            logger.LogError(ex, "Erro ao adicionar produto {NomeProduto}.", dto.Nome);
             return ResultadoDto<Guid>.RetornaErro("Não foi possível salvar o produto.");
         }
     }
@@ -92,43 +80,22 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
     {
         try
         {
-            logger.LogInformation("Iniciando atualização do produto {ProdutoId}.", dto.IdProduto);
-
-            var produtoExistente = await produtoRepository.ObterProdutosPorIdAsync(dto.IdProduto, cancellationToken);
-
-            if (produtoExistente == null)
-            {
-                logger.LogWarning("Falha na atualização: Produto {ProdutoId} inexistente.", dto.IdProduto);
+            var produto = await produtoRepository.ObterProdutosPorIdAsync(dto.IdProduto, cancellationToken);
+            if (produto is null)
                 return ResultadoDto<bool>.RetornaNaoEncontrado("Produto não encontrado para atualização.");
-            }
 
-            // Atualiza propriedades básicas
-            if(!string.IsNullOrEmpty(dto.Nome))
-                produtoExistente.Nome = dto.Nome;
-            if(dto.PrecoCusto.HasValue)
-                produtoExistente.PrecoCusto = dto.PrecoCusto.Value;
-            if(dto.QuantidadeFilamento.HasValue)
-                produtoExistente.QuantidadeFilamento = dto.QuantidadeFilamento.Value;
-            if(dto.TempoImpressao.HasValue)
-                produtoExistente.TempoImpressao = dto.TempoImpressao.Value;
+            produto.Nome = dto.Nome;
+            produto.TempoImpressaoMinutos = dto.TempoImpressaoMinutos ?? 0;
+            produto.TempoMaoDeObraMinutos = dto.TempoMaoDeObraMinutos ?? 0;
+            produto.IdEquipamento = dto.IdEquipamento;
+            ProdutoMapper.AplicarRelacionamentos(produto, dto.Filamentos, dto.Insumos, dto.Componentes);
 
-            // Atualiza Composição (simplificado: remove e adiciona)
-            produtoExistente.ComposicoesPai.Clear();
-            if (dto.Componentes != null)
-            {
-                foreach (var comp in dto.Componentes)
-                {
-                    if (comp.IdProdutoFilho != Guid.Empty)
-                    {
-                        produtoExistente.ComposicoesPai.Add(new ProdutoComposicao { IdProdutoFilho = comp.IdProdutoFilho, Quantidade = comp.Quantidade });
-                    }
-                }
-            }
+            var erro = await ValidarComposicoesAsync(produto.IdProduto, produto.ComposicoesPai, cancellationToken);
+            if (erro is not null)
+                return ResultadoDto<bool>.RetornaErro(erro);
 
-            produtoRepository.Atualizar(produtoExistente);
+            produtoRepository.Atualizar(produto);
             await produtoRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-
-            logger.LogInformation("Produto {ProdutoId} atualizado com sucesso.", dto.IdProduto);
             return ResultadoDto<bool>.RetornaSucesso("Produto atualizado com sucesso.");
         }
         catch (Exception ex)
@@ -136,5 +103,33 @@ public class ProdutoService(IProdutoRepository produtoRepository, ILogger<Produt
             logger.LogError(ex, "Erro ao atualizar produto {ProdutoId}.", dto.IdProduto);
             return ResultadoDto<bool>.RetornaErro("Erro ao processar a atualização do produto.");
         }
+    }
+
+    private async Task<string?> ValidarComposicoesAsync(
+        Guid idProduto,
+        IEnumerable<ProdutoComposicao> novasComposicoes,
+        CancellationToken cancellationToken)
+    {
+        var existentes = (await produtoRepository.ObterTodasComposicoesAsync(cancellationToken))
+            .Where(x => x.IdProdutoPai != idProduto)
+            .ToList();
+
+        foreach (var composicao in novasComposicoes)
+        {
+            if (composicao.Quantidade <= 0)
+                return "A quantidade de um produto componente deve ser maior que zero.";
+
+            if (ValidadorCicloProduto.PossuiCiclo(idProduto, composicao.IdProdutoFilho, existentes))
+                return "A composição informada criaria um ciclo entre produtos.";
+
+            existentes.Add(new ProdutoComposicao
+            {
+                IdProdutoPai = idProduto,
+                IdProdutoFilho = composicao.IdProdutoFilho,
+                Quantidade = composicao.Quantidade
+            });
+        }
+
+        return null;
     }
 }

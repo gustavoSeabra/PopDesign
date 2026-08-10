@@ -4,6 +4,7 @@ using PopLume.Application.Mappers;
 using PopLume.Application.Services.Interfaces;
 using PopLume.Domain.Entities;
 using PopLume.Domain.Repositories;
+using PopLume.Domain.Precificacao;
 
 namespace PopLume.Application.Services;
 
@@ -95,6 +96,8 @@ public class MarketplaceService(
             logger.LogInformation("Tentando adicionar novo marketplace: {NomeMarketplace}", dto.Nome);
 
             var marketplace = dto.ToEntity();
+            if (ValidadorFaixasMarketplace.PossuiSobreposicao(marketplace.TaxasMarketplace))
+                return ResultadoDto<Guid>.RetornaErro("As faixas de preço do marketplace não podem se sobrepor.");
             marketplaceRepository.Adicionar(marketplace);
             await marketplaceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -130,6 +133,9 @@ public class MarketplaceService(
             var resultadoSincronizacaoTaxas = SincronizarTaxasMarketplace(marketplaceExistente, dto.TaxasMarketplace);
             if (resultadoSincronizacaoTaxas != null)
                 return resultadoSincronizacaoTaxas;
+
+            if (ValidadorFaixasMarketplace.PossuiSobreposicao(marketplaceExistente.TaxasMarketplace))
+                return ResultadoDto<bool>.RetornaErro("As faixas de preço do marketplace não podem se sobrepor.");
 
             await marketplaceRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -242,8 +248,8 @@ public class MarketplaceService(
             {
                 IdMarketplace = marketplace.IdMarketplace,
                 ValorInicial = taxaDto.ValorInicial!.Value,
-                ValorFinal = taxaDto.ValorFinal!.Value,
-                Comissao = taxaDto.Comissao ?? 0m,
+                ValorFinal = taxaDto.ValorFinal,
+                ComissaoPercentual = taxaDto.ComissaoPercentual ?? 0m,
                 TaxaFixa = taxaDto.TaxaFixa!.Value
             });
         }
@@ -255,7 +261,7 @@ public class MarketplaceService(
     {
         var valorInicial = taxaDto.ValorInicial ?? taxaExistente.ValorInicial;
         var valorFinal = taxaDto.ValorFinal ?? taxaExistente.ValorFinal;
-        var comissao = taxaDto.Comissao ?? taxaExistente.Comissao;
+        var comissao = taxaDto.ComissaoPercentual ?? taxaExistente.ComissaoPercentual;
         var taxaFixa = taxaDto.TaxaFixa ?? taxaExistente.TaxaFixa;
 
         return taxaExistente.TentarAtualizarValores(valorInicial, valorFinal, comissao, taxaFixa)

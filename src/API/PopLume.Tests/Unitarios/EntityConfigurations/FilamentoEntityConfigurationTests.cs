@@ -19,7 +19,7 @@ public class FilamentoEntityConfigurationTests
 
         var propriedade = entityBuilder.Metadata.FindProperty(nameof(Filamento.Tipo));
         propriedade.Should().NotBeNull();
-        propriedade!.GetValueConverter().Should().NotBeNull();
+        propriedade!.GetProviderClrType().Should().Be(typeof(string));
         propriedade.GetMaxLength().Should().Be(10);
     }
 }

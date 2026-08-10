@@ -13,8 +13,8 @@ public static class FilamentoDtoMock
         new()
         {
             Cor = Faker.Commerce.Color(),
-            Valor = Faker.Finance.Amount(50, 500),
-            Peso = Faker.Random.Decimal(250, 5000),
+            ValorCompra = Faker.Finance.Amount(50, 500),
+            PesoLiquidoGramas = Faker.Random.Decimal(250, 5000),
             Tipo = Faker.PickRandom<TipoFilamento>(),
             DataCompra = DateOnly.FromDateTime(Faker.Date.Past())
         };
@@ -24,8 +24,8 @@ public static class FilamentoDtoMock
         {
             IdFilamento = idFilamento ?? Guid.NewGuid(),
             Cor = Faker.Commerce.Color(),
-            Valor = Faker.Finance.Amount(50, 500),
-            Peso = Faker.Random.Decimal(250, 5000),
+            ValorCompra = Faker.Finance.Amount(50, 500),
+            PesoLiquidoGramas = Faker.Random.Decimal(250, 5000),
             Tipo = Faker.PickRandom<TipoFilamento>(),
             DataCompra = DateOnly.FromDateTime(Faker.Date.Past())
         };
@@ -35,8 +35,8 @@ public static class FilamentoDtoMock
         {
             IdFilamento = idFilamento ?? Guid.NewGuid(),
             Cor = Faker.Commerce.Color(),
-            Valor = Faker.Finance.Amount(50, 500),
-            Peso = Faker.Random.Decimal(250, 5000),
+            ValorCompra = Faker.Finance.Amount(50, 500),
+            PesoLiquidoGramas = Faker.Random.Decimal(250, 5000),
             Tipo = Faker.PickRandom<TipoFilamento>(),
             DataCompra = DateOnly.FromDateTime(Faker.Date.Past())
         };

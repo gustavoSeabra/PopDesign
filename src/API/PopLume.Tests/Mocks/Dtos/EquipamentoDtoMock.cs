@@ -14,9 +14,9 @@ public static class EquipamentoDtoMock
             Nome = Faker.Commerce.ProductName(),
             Apelido = Faker.Commerce.ProductAdjective(),
             DataCompra = DateOnly.FromDateTime(Faker.Date.Past()),
-            Potencia = Faker.Random.Int(100, 1000),
+            PotenciaWatts = Faker.Random.Int(100, 1000),
             ValorCompra = Faker.Finance.Amount(500, 10000),
-            ExpectativaVida = Faker.Random.Int(1000, 10000)
+            VidaUtilHoras = Faker.Random.Int(1000, 10000)
         };
 
     public static UpdateEquipamentoDto UpdateEquipamentoDtoValido(Guid? idEquipamento = null) =>
@@ -26,9 +26,9 @@ public static class EquipamentoDtoMock
             Nome = Faker.Commerce.ProductName(),
             Apelido = Faker.Commerce.ProductAdjective(),
             DataCompra = DateOnly.FromDateTime(Faker.Date.Past()),
-            Potencia = Faker.Random.Int(100, 1000),
+            PotenciaWatts = Faker.Random.Int(100, 1000),
             ValorCompra = Faker.Finance.Amount(500, 10000),
-            ExpectativaVida = Faker.Random.Int(1000, 10000)
+            VidaUtilHoras = Faker.Random.Int(1000, 10000)
         };
 
     public static Equipamento EquipamentoValido(Guid? idEquipamento = null, string? nome = null, string? apelido = null) =>
@@ -38,9 +38,9 @@ public static class EquipamentoDtoMock
             Nome = nome ?? Faker.Commerce.ProductName(),
             Apelido = apelido ?? Faker.Commerce.ProductAdjective(),
             DataCompra = DateOnly.FromDateTime(Faker.Date.Past()),
-            Potencia = Faker.Random.Int(100, 1000),
+            PotenciaWatts = Faker.Random.Int(100, 1000),
             ValorCompra = Faker.Finance.Amount(500, 10000),
-            ExpectativaVida = Faker.Random.Int(1000, 10000)
+            VidaUtilHoras = Faker.Random.Int(1000, 10000)
         };
 
     public static Equipamento EquipamentoDesativado(Guid? idEquipamento = null)

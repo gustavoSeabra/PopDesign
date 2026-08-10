@@ -15,10 +15,10 @@ public static class EquipamentoMapper
             Nome = equipamento.Nome,
             Apelido = equipamento.Apelido,
             DataCompra = equipamento.DataCompra,
-            Potencia = equipamento.Potencia,
+            PotenciaWatts = equipamento.PotenciaWatts,
             ValorCompra = equipamento.ValorCompra,
-            ExpectativaVida = equipamento.ExpectativaVida,
-            ValorHora = equipamento.ValorHora,
+            VidaUtilHoras = equipamento.VidaUtilHoras,
+            CustoDepreciacaoHora = equipamento.CustoDepreciacaoHora,
             Excluido = equipamento.Excluido,
             DataExclusao = equipamento.DataExclusao
         };
@@ -33,9 +33,9 @@ public static class EquipamentoMapper
             Nome = dto.Nome,
             Apelido = dto.Apelido,
             DataCompra = dto.DataCompra!.Value,
-            Potencia = dto.Potencia ?? 0,
+            PotenciaWatts = dto.PotenciaWatts ?? 0,
             ValorCompra = dto.ValorCompra ?? 0m,
-            ExpectativaVida = dto.ExpectativaVida ?? 0
+            VidaUtilHoras = dto.VidaUtilHoras ?? 0
         };
     }
 }

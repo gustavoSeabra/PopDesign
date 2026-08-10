@@ -11,11 +11,11 @@ public class CreateFilamentoValidator : AbstractValidator<CreateFilamentoDto>
             .NotEmpty().WithMessage("A cor do filamento é obrigatória.")
             .MaximumLength(50).WithMessage("A cor do filamento deve ter no máximo 50 caracteres.");
 
-        RuleFor(x => x.Valor)
+        RuleFor(x => x.ValorCompra)
             .NotNull().WithMessage("O valor do filamento é obrigatório.")
             .GreaterThanOrEqualTo(0).WithMessage("O valor do filamento não pode ser negativo.");
 
-        RuleFor(x => x.Peso)
+        RuleFor(x => x.PesoLiquidoGramas)
             .NotNull().WithMessage("O peso do filamento é obrigatório.")
             .GreaterThan(0).WithMessage("O peso do filamento em gramas deve ser maior que zero.");
 
@@ -39,11 +39,11 @@ public class UpdateFilamentoValidator : AbstractValidator<UpdateFilamentoDto>
             .NotEmpty().WithMessage("A cor do filamento é obrigatória.")
             .MaximumLength(50).WithMessage("A cor do filamento deve ter no máximo 50 caracteres.");
 
-        RuleFor(x => x.Valor)
+        RuleFor(x => x.ValorCompra)
             .NotNull().WithMessage("O valor do filamento é obrigatório.")
             .GreaterThanOrEqualTo(0).WithMessage("O valor do filamento não pode ser negativo.");
 
-        RuleFor(x => x.Peso)
+        RuleFor(x => x.PesoLiquidoGramas)
             .NotNull().WithMessage("O peso do filamento é obrigatório.")
             .GreaterThan(0).WithMessage("O peso do filamento em gramas deve ser maior que zero.");
 

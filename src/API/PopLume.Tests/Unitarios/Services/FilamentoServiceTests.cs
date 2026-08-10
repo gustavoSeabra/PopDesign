@@ -51,8 +51,8 @@ public class FilamentoServiceTests
 
         resultado.Ok.Should().BeTrue();
         filamento.Cor.Should().Be(dto.Cor);
-        filamento.Valor.Should().Be(dto.Valor);
-        filamento.Peso.Should().Be(dto.Peso);
+        filamento.ValorCompra.Should().Be(dto.ValorCompra);
+        filamento.PesoLiquidoGramas.Should().Be(dto.PesoLiquidoGramas);
         filamento.Tipo.Should().Be(dto.Tipo);
         filamento.DataCompra.Should().Be(dto.DataCompra);
         _repositoryMock.Verify(repository => repository.Atualizar(filamento), Times.Once);

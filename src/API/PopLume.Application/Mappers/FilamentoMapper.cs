@@ -10,8 +10,8 @@ public static class FilamentoMapper
         {
             IdFilamento = filamento.IdFilamento,
             Cor = filamento.Cor,
-            Valor = filamento.Valor,
-            Peso = filamento.Peso,
+            ValorCompra = filamento.ValorCompra,
+            PesoLiquidoGramas = filamento.PesoLiquidoGramas,
             Tipo = filamento.Tipo,
             DataCompra = filamento.DataCompra
         };
@@ -20,8 +20,8 @@ public static class FilamentoMapper
         new()
         {
             Cor = dto.Cor,
-            Valor = dto.Valor!.Value,
-            Peso = dto.Peso!.Value,
+            ValorCompra = dto.ValorCompra!.Value,
+            PesoLiquidoGramas = dto.PesoLiquidoGramas!.Value,
             Tipo = dto.Tipo!.Value,
             DataCompra = dto.DataCompra!.Value
         };

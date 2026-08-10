@@ -42,12 +42,12 @@ public class FilamentoValidatorsTests
     public void CreateFilamentoValidator_DeveRejeitarPesoInvalido(decimal peso)
     {
         var dto = FilamentoDtoMock.CreateFilamentoDtoValido();
-        dto.Peso = peso;
+        dto.PesoLiquidoGramas = peso;
 
         var resultado = new CreateFilamentoValidator().Validate(dto);
 
         resultado.Errors.Should().Contain(erro =>
-            erro.PropertyName == nameof(CreateFilamentoDto.Peso));
+            erro.PropertyName == nameof(CreateFilamentoDto.PesoLiquidoGramas));
     }
 
     [Fact(DisplayName = "Deve exigir todos os campos na criação.")]
@@ -60,8 +60,8 @@ public class FilamentoValidatorsTests
         resultado.Errors.Select(erro => erro.PropertyName).Should().Contain(
         [
             nameof(CreateFilamentoDto.Cor),
-            nameof(CreateFilamentoDto.Valor),
-            nameof(CreateFilamentoDto.Peso),
+            nameof(CreateFilamentoDto.ValorCompra),
+            nameof(CreateFilamentoDto.PesoLiquidoGramas),
             nameof(CreateFilamentoDto.Tipo),
             nameof(CreateFilamentoDto.DataCompra)
         ]);
@@ -78,8 +78,8 @@ public class FilamentoValidatorsTests
         [
             nameof(UpdateFilamentoDto.IdFilamento),
             nameof(UpdateFilamentoDto.Cor),
-            nameof(UpdateFilamentoDto.Valor),
-            nameof(UpdateFilamentoDto.Peso),
+            nameof(UpdateFilamentoDto.ValorCompra),
+            nameof(UpdateFilamentoDto.PesoLiquidoGramas),
             nameof(UpdateFilamentoDto.Tipo),
             nameof(UpdateFilamentoDto.DataCompra)
         ]);

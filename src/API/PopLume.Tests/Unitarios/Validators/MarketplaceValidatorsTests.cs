@@ -30,7 +30,6 @@ public class MarketplaceValidatorsTests
         var remocoes = new Action<CreateMarketplaceTaxaDto>[]
         {
             dto => dto.ValorInicial = null,
-            dto => dto.ValorFinal = null,
             dto => dto.TaxaFixa = null
         };
 
@@ -53,7 +52,7 @@ public class MarketplaceValidatorsTests
         // Arrange
         var validator = new CreateMarketplaceTaxaValidator();
         var dto = MarketplaceDtoMock.CreateMarketplaceTaxaDtoValida();
-        dto.Comissao = null;
+        dto.ComissaoPercentual = null;
 
         // Act
         var resultado = validator.Validate(dto);
@@ -70,7 +69,6 @@ public class MarketplaceValidatorsTests
         var remocoes = new Action<UpdateMarketplaceTaxaDto>[]
         {
             dto => dto.ValorInicial = null,
-            dto => dto.ValorFinal = null,
             dto => dto.TaxaFixa = null
         };
 
@@ -87,6 +85,16 @@ public class MarketplaceValidatorsTests
         }
     }
 
+    [Fact(DisplayName = "Deve aceitar uma faixa final sem limite superior.")]
+    public void CreateMarketplaceTaxaValidator_DeveAceitarValorFinalNulo()
+    {
+        var validator = new CreateMarketplaceTaxaValidator();
+        var dto = MarketplaceDtoMock.CreateMarketplaceTaxaDtoValida();
+        dto.ValorFinal = null;
+
+        validator.Validate(dto).IsValid.Should().BeTrue();
+    }
+
     [Fact(DisplayName = "Deve permitir atualização parcial de uma taxa existente.")]
     public void UpdateMarketplaceTaxaValidator_DeveAceitarAtualizacaoParcialDeTaxaExistente()
     {
@@ -95,7 +103,7 @@ public class MarketplaceValidatorsTests
         var dto = new UpdateMarketplaceTaxaDto
         {
             IdTaxa = Guid.NewGuid(),
-            Comissao = 2.75m
+            ComissaoPercentual = 2.75m
         };
 
         // Act
@@ -111,14 +119,14 @@ public class MarketplaceValidatorsTests
         // Arrange
         var validator = new CreateMarketplaceTaxaValidator();
         var dto = MarketplaceDtoMock.CreateMarketplaceTaxaDtoValida();
-        dto.Comissao = 2.75m;
+        dto.ComissaoPercentual = 2.75m;
 
         // Act
         var resultado = validator.Validate(dto);
 
         // Assert
         resultado.Errors.Should()
-            .NotContain(erro => erro.PropertyName == nameof(dto.Comissao));
+            .NotContain(erro => erro.PropertyName == nameof(dto.ComissaoPercentual));
     }
 
     [Fact(DisplayName = "Deve rejeitar comissão decimal fora do intervalo permitido.")]
@@ -131,14 +139,14 @@ public class MarketplaceValidatorsTests
         foreach (var comissao in comissoesInvalidas)
         {
             var dto = MarketplaceDtoMock.CreateMarketplaceTaxaDtoValida();
-            dto.Comissao = comissao;
+            dto.ComissaoPercentual = comissao;
 
             // Act
             var resultado = validator.Validate(dto);
 
             // Assert
             resultado.Errors.Should()
-                .Contain(erro => erro.PropertyName == nameof(dto.Comissao));
+                .Contain(erro => erro.PropertyName == nameof(dto.ComissaoPercentual));
         }
     }
 }

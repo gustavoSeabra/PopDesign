@@ -15,13 +15,13 @@ public class EquipamentoEntityConfiguration : IEntityTypeConfiguration<Equipamen
         builder.Property(e => e.Nome).IsRequired().HasMaxLength(100);
         builder.Property(e => e.Apelido).HasMaxLength(50);
         builder.Property(e => e.DataCompra).HasColumnType("date").IsRequired();
-        builder.Property(e => e.Potencia).IsRequired();
+        builder.Property(e => e.PotenciaWatts).IsRequired();
         builder.Property(e => e.ValorCompra).HasPrecision(10, 2);
-        builder.Property(e => e.ExpectativaVida);
-        builder.Property(e => e.ValorHora)
+        builder.Property(e => e.VidaUtilHoras);
+        builder.Property(e => e.CustoDepreciacaoHora)
             .HasPrecision(10, 2)
             .HasComputedColumnSql(
-                """CASE WHEN "ExpectativaVida" > 0 THEN "ValorCompra" / "ExpectativaVida" ELSE 0 END""",
+                """CASE WHEN "VidaUtilHoras" > 0 THEN "ValorCompra" / "VidaUtilHoras" ELSE 0 END""",
                 stored: true);
         builder.Property(e => e.Excluido).IsRequired().HasDefaultValue(false);
         builder.Property(e => e.DataExclusao);

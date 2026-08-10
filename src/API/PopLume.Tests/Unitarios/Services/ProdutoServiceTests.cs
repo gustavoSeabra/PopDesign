@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
+using PopLume.Application.Dtos;
 using PopLume.Application.Services;
 using PopLume.Domain.Entities;
 using PopLume.Domain.Repositories;
@@ -11,51 +12,28 @@ namespace PopLume.Tests.Unitarios.Services;
 
 public class ProdutoServiceTests
 {
-    private readonly Mock<IProdutoRepository> _produtoRepositoryMock = new();
-    private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
-    private readonly Mock<ILogger<ProdutoService>> _loggerMock = new();
+    private readonly Mock<IProdutoRepository> repository = new();
+    private readonly Mock<IUnitOfWork> unitOfWork = new();
+    private readonly ProdutoService service;
 
-    private ProdutoService CriarService()
+    public ProdutoServiceTests()
     {
-        _produtoRepositoryMock
-            .Setup(repository => repository.UnitOfWork)
-            .Returns(_unitOfWorkMock.Object);
-
-        return new ProdutoService(_produtoRepositoryMock.Object, _loggerMock.Object);
+        repository.SetupGet(x => x.UnitOfWork).Returns(unitOfWork.Object);
+        repository.Setup(x => x.ObterTodasComposicoesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        service = new ProdutoService(repository.Object, Mock.Of<ILogger<ProdutoService>>());
     }
 
-    [Fact(DisplayName = "Deve listar todos os produtos retornados pelo repositório.")]
-    public async Task ObterTodosAsync_DeveRetornarTodosOsProdutos()
+    [Fact]
+    public async Task AdicionarAsync_DeveCriarProdutoSemPrecoDeCustoManual()
     {
-        // Arrange
-        var produtos = ProdutoDtoMock.ProdutosValidos();
-
-        _produtoRepositoryMock
-            .Setup(repository => repository.ObterTodosProdutosAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(produtos);
-
-        var service = CriarService();
-
-        // Act
-        var resultado = await service.ObterTodosAsync();
-
-        // Assert
-        resultado.Ok.Should().BeTrue();
-        resultado.Data.Should().NotBeNull();
-        resultado.Data.Should().HaveCount(produtos.Count);
-        resultado.Data.Should().OnlyContain(produtoDto =>
-            produtos.Any(produto => produto.IdProduto == produtoDto.IdProduto));
-    }
-
-    [Fact(DisplayName = "Deve listar produtos filtrados por parte do nome informado.")]
-    public async Task ObterPorNomeAsync_DeveRetornarProdutosQueContenhamParteDoNome()
-    {
-        // Arrange
-        const string parteNome = "Chaveiro";
-        var produtos = new List<Produto>
+        Produto? salvo = null;
+        repository.Setup(x => x.Adicionar(It.IsAny<Produto>())).Callback<Produto>(x => salvo = x);
+        var dto = new CreateProdutoDto
         {
-            ProdutoDtoMock.ProdutoValido(nome: "Chaveiro Personalizado"),
-            ProdutoDtoMock.ProdutoValido(nome: "Mini Chaveiro 3D")
+            Nome = "Chaveiro",
+            TempoImpressaoMinutos = 45,
+            TempoMaoDeObraMinutos = 10
         };
 
         _produtoRepositoryMock
@@ -123,160 +101,80 @@ public class ProdutoServiceTests
 
         // Assert
         resultado.Ok.Should().BeTrue();
-        produtoAdicionado.Should().NotBeNull();
-        produtoAdicionado!.Nome.Should().Be(dto.Nome);
-        produtoAdicionado.ComposicoesPai.Should().BeEmpty();
+        salvo.Should().NotBeNull();
+        salvo!.PrecoCusto.Should().Be(0);
+        salvo.TempoImpressaoMinutos.Should().Be(45);
     }
 
-    [Fact(DisplayName = "Deve cadastrar um produto com componentes.")]
-    public async Task AdicionarAsync_DeveCadastrarProdutoComComponentes()
+    [Fact]
+    public async Task AtualizarAsync_DeveRejeitarComposicaoDiretaComOProprioProduto()
     {
-        // Arrange
-        var dto = ProdutoDtoMock.CreateProdutoDtoComComponentes();
-        Produto? produtoAdicionado = null;
+        var id = Guid.NewGuid();
+        repository.Setup(x => x.ObterProdutosPorIdAsync(id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Produto { IdProduto = id, Nome = "Kit" });
+        var dto = new UpdateProdutoDto
+        {
+            IdProduto = id,
+            Nome = "Kit",
+            Componentes = [new ProdutoComponenteDto { IdProdutoFilho = id, Quantidade = 1 }]
+        };
 
-        _produtoRepositoryMock
-            .Setup(repository => repository.Adicionar(It.IsAny<Produto>()))
-            .Callback<Produto>(produto => produtoAdicionado = produto);
+        var resultado = await service.AtualizarAsync(dto);
 
-        _unitOfWorkMock
-            .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
+        resultado.Ok.Should().BeFalse();
+        repository.Verify(x => x.Atualizar(It.IsAny<Produto>()), Times.Never);
+    }
 
-        var service = CriarService();
+    [Fact]
+    public async Task AtualizarAsync_DeveRejeitarCicloIndireto()
+    {
+        var a = Guid.NewGuid();
+        var b = Guid.NewGuid();
+        var c = Guid.NewGuid();
+        repository.Setup(x => x.ObterProdutosPorIdAsync(a, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Produto { IdProduto = a, Nome = "A" });
+        repository.Setup(x => x.ObterTodasComposicoesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([
+                new ProdutoComposicao { IdProdutoPai = b, IdProdutoFilho = c, Quantidade = 1 },
+                new ProdutoComposicao { IdProdutoPai = c, IdProdutoFilho = a, Quantidade = 1 }
+            ]);
+        var dto = new UpdateProdutoDto
+        {
+            IdProduto = a,
+            Nome = "A",
+            Componentes = [new ProdutoComponenteDto { IdProdutoFilho = b, Quantidade = 1 }]
+        };
 
         // Act
-        var resultado = await service.AdicionarAsync(dto);
+        var resultado = await service.AtualizarAsync(dto);
 
-        // Assert
-        resultado.Ok.Should().BeTrue();
-        produtoAdicionado.Should().NotBeNull();
-        produtoAdicionado!.ComposicoesPai.Should().HaveCount(dto.Componentes!.Count);
-        produtoAdicionado.ComposicoesPai.Select(composicao => composicao.IdProdutoFilho)
-            .Should().BeEquivalentTo(dto.Componentes.Select(componente => componente.IdProdutoFilho));
+        resultado.Ok.Should().BeFalse();
+        repository.Verify(x => x.Atualizar(It.IsAny<Produto>()), Times.Never);
     }
 
-    [Fact(DisplayName = "Deve manter quantidade de filamento e tempo de impressão zerados ao cadastrar produto sem componentes.")]
-    public async Task AdicionarAsync_DeveManterQuantidadeFilamentoETempoImpressaoZerados_QuandoProdutoNaoPossuirComponentes()
+    [Fact]
+    public async Task AtualizarAsync_DeveAceitarKitSemCiclo()
     {
-        // Arrange
-        var dto = ProdutoDtoMock.CreateProdutoDtoSemComponentes();
-        Produto? produtoAdicionado = null;
-
-        _produtoRepositoryMock
-            .Setup(repository => repository.Adicionar(It.IsAny<Produto>()))
-            .Callback<Produto>(produto => produtoAdicionado = produto);
-
-        _unitOfWorkMock
-            .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        var service = CriarService();
-
-        // Act
-        await service.AdicionarAsync(dto);
-
-        // Assert
-        produtoAdicionado.Should().NotBeNull();
-        produtoAdicionado!.QuantidadeFilamento.Should().Be(0);
-        produtoAdicionado.TempoImpressao.Should().Be(0);
-    }
-
-    [Fact(DisplayName = "Deve editar um produto sem componentes.")]
-    public async Task AtualizarAsync_DeveEditarProdutoSemComponentes()
-    {
-        // Arrange
-        var produtoExistente = ProdutoDtoMock.ProdutoValido();
-        var dto = ProdutoDtoMock.UpdateProdutoDtoSemComponentes(produtoExistente.IdProduto);
-        Produto? produtoAtualizado = null;
-
-        _produtoRepositoryMock
-            .Setup(repository => repository.ObterProdutosPorIdAsync(dto.IdProduto, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(produtoExistente);
-
-        _produtoRepositoryMock
-            .Setup(repository => repository.Atualizar(It.IsAny<Produto>()))
-            .Callback<Produto>(produto => produtoAtualizado = produto);
-
-        _unitOfWorkMock
-            .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        var service = CriarService();
+        var kit = Guid.NewGuid();
+        repository.Setup(x => x.ObterProdutosPorIdAsync(kit, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Produto { IdProduto = kit, Nome = "Kit" });
+        var dto = new UpdateProdutoDto
+        {
+            IdProduto = kit,
+            Nome = "Kit Dia dos Pais",
+            Componentes =
+            [
+                new ProdutoComponenteDto { IdProdutoFilho = Guid.NewGuid(), Quantidade = 1 },
+                new ProdutoComponenteDto { IdProdutoFilho = Guid.NewGuid(), Quantidade = 1 },
+                new ProdutoComponenteDto { IdProdutoFilho = Guid.NewGuid(), Quantidade = 1 }
+            ]
+        };
 
         // Act
         var resultado = await service.AtualizarAsync(dto);
 
         // Assert
         resultado.Ok.Should().BeTrue();
-        produtoAtualizado.Should().NotBeNull();
-        produtoAtualizado!.Nome.Should().Be(dto.Nome);
-        produtoAtualizado.PrecoCusto.Should().Be(dto.PrecoCusto);
-        produtoAtualizado.ComposicoesPai.Should().BeEmpty();
-    }
-
-    [Fact(DisplayName = "Deve editar um produto com componentes.")]
-    public async Task AtualizarAsync_DeveEditarProdutoComComponentes()
-    {
-        // Arrange
-        var produtoExistente = ProdutoDtoMock.ProdutoValido();
-        var dto = ProdutoDtoMock.UpdateProdutoDtoComComponentes(produtoExistente.IdProduto);
-        Produto? produtoAtualizado = null;
-
-        _produtoRepositoryMock
-            .Setup(repository => repository.ObterProdutosPorIdAsync(dto.IdProduto, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(produtoExistente);
-
-        _produtoRepositoryMock
-            .Setup(repository => repository.Atualizar(It.IsAny<Produto>()))
-            .Callback<Produto>(produto => produtoAtualizado = produto);
-
-        _unitOfWorkMock
-            .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        var service = CriarService();
-
-        // Act
-        var resultado = await service.AtualizarAsync(dto);
-
-        // Assert
-        resultado.Ok.Should().BeTrue();
-        produtoAtualizado.Should().NotBeNull();
-        produtoAtualizado!.Nome.Should().Be(dto.Nome);
-        produtoAtualizado.ComposicoesPai.Should().HaveCount(dto.Componentes!.Count);
-        produtoAtualizado.ComposicoesPai.Select(composicao => composicao.IdProdutoFilho)
-            .Should().BeEquivalentTo(dto.Componentes.Select(componente => componente.IdProdutoFilho));
-    }
-
-    [Fact(DisplayName = "Deve manter quantidade de filamento e tempo de impressão zerados ao editar produto sem componentes.")]
-    public async Task AtualizarAsync_DeveManterQuantidadeFilamentoETempoImpressaoZerados_QuandoProdutoNaoPossuirComponentes()
-    {
-        // Arrange
-        var produtoExistente = ProdutoDtoMock.ProdutoValido();
-        var dto = ProdutoDtoMock.UpdateProdutoDtoSemComponentes(produtoExistente.IdProduto);
-        Produto? produtoAtualizado = null;
-
-        _produtoRepositoryMock
-            .Setup(repository => repository.ObterProdutosPorIdAsync(dto.IdProduto, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(produtoExistente);
-
-        _produtoRepositoryMock
-            .Setup(repository => repository.Atualizar(It.IsAny<Produto>()))
-            .Callback<Produto>(produto => produtoAtualizado = produto);
-
-        _unitOfWorkMock
-            .Setup(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
-
-        var service = CriarService();
-
-        // Act
-        await service.AtualizarAsync(dto);
-
-        // Assert
-        produtoAtualizado.Should().NotBeNull();
-        produtoAtualizado!.QuantidadeFilamento.Should().Be(0);
-        produtoAtualizado.TempoImpressao.Should().Be(0);
+        repository.Verify(x => x.Atualizar(It.Is<Produto>(p => p.ComposicoesPai.Count == 3)), Times.Once);
     }
 }

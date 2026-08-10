@@ -17,12 +17,9 @@ public class FilamentoEntityConfiguration : IEntityTypeConfiguration<Filamento>
 
         builder.HasKey(f => f.IdFilamento);
         builder.Property(f => f.Cor).IsRequired().HasMaxLength(50);
-        builder.Property(f => f.Valor).IsRequired().HasPrecision(10, 2);
-        builder.Property(f => f.Peso).IsRequired().HasPrecision(10, 2);
-        builder.Property(f => f.Tipo)
-            .IsRequired()
-            .HasConversion(new EnumToStringConverter<TipoFilamento>())
-            .HasMaxLength(10);
+        builder.Property(f => f.ValorCompra).IsRequired().HasPrecision(10, 2);
+        builder.Property(f => f.PesoLiquidoGramas).IsRequired().HasPrecision(10, 3);
+        builder.Property(f => f.Tipo).IsRequired().HasConversion<string>().HasMaxLength(10);
         builder.Property(f => f.DataCompra).HasColumnType("date").IsRequired();
     }
 }
