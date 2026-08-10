@@ -16,12 +16,20 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IEquipamentoService, EquipamentoService>();
         services.AddScoped<IMarketplaceService, MarketplaceService>();
         services.AddScoped<IFilamentoService, FilamentoService>();
+        services.AddScoped<IInsumoService, InsumoService>();
+        services.AddScoped<ITarifaEnergiaService, TarifaEnergiaService>();
+        services.AddScoped<ICustoMaoDeObraService, CustoMaoDeObraService>();
+        services.AddScoped<IPrecificacaoService, PrecificacaoService>();
 
         // Repositórios
         services.AddScoped<IEquipamentoRepository, EquipamentoRepository>();
         services.AddScoped<IProdutoRepository, ProdutoRepository>();
         services.AddScoped<IMarketplaceRepository, MarketplaceRepository>();
         services.AddScoped<IFilamentoRepository, FilamentoRepository>();
+        services.AddScoped<IInsumoRepository, InsumoRepository>();
+        services.AddScoped<ITarifaEnergiaRepository, TarifaEnergiaRepository>();
+        services.AddScoped<ICustoMaoDeObraRepository, CustoMaoDeObraRepository>();
+        services.AddScoped<IFichaPrecificacaoRepository, FichaPrecificacaoRepository>();
 
         return services;
     }

@@ -16,9 +16,9 @@ public class EquipamentoValidatorsTests
         {
             Nome = "Impressora 3D",
             DataCompra = DateOnly.FromDateTime(DateTime.Today),
-            Potencia = 220,
+            PotenciaWatts = 220,
             ValorCompra = 4000m,
-            ExpectativaVida = 2000
+            VidaUtilHoras = 2000
         };
 
         // Act
@@ -39,9 +39,9 @@ public class EquipamentoValidatorsTests
         {
             Nome = "Impressora 3D",
             DataCompra = DateOnly.FromDateTime(DateTime.Today),
-            Potencia = 220,
+            PotenciaWatts = 220,
             ValorCompra = 4000m,
-            ExpectativaVida = expectativaVida
+            VidaUtilHoras = expectativaVida
         };
 
         // Act
@@ -49,7 +49,7 @@ public class EquipamentoValidatorsTests
 
         // Assert
         resultado.Errors.Should().ContainSingle(erro =>
-            erro.PropertyName == nameof(CreateEquipamentoDto.ExpectativaVida) &&
+            erro.PropertyName == nameof(CreateEquipamentoDto.VidaUtilHoras) &&
             erro.ErrorMessage == "A expectativa de vida em horas deve ser maior que zero.");
     }
 
@@ -64,9 +64,9 @@ public class EquipamentoValidatorsTests
         {
             IdEquipamento = Guid.NewGuid(),
             Nome = "Impressora 3D",
-            Potencia = 220,
+            PotenciaWatts = 220,
             ValorCompra = 4000m,
-            ExpectativaVida = expectativaVida
+            VidaUtilHoras = expectativaVida
         };
 
         // Act
@@ -74,7 +74,7 @@ public class EquipamentoValidatorsTests
 
         // Assert
         resultado.Errors.Should().ContainSingle(erro =>
-            erro.PropertyName == nameof(UpdateEquipamentoDto.ExpectativaVida) &&
+            erro.PropertyName == nameof(UpdateEquipamentoDto.VidaUtilHoras) &&
             erro.ErrorMessage == "A expectativa de vida em horas deve ser maior que zero.");
     }
 }

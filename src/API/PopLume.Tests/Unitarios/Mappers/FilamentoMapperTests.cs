@@ -15,22 +15,27 @@ public class FilamentoMapperTests
 
         var dto = filamento.ToDto();
 
-        dto.Should().BeEquivalentTo(filamento);
+        dto.IdFilamento.Should().Be(filamento.IdFilamento);
+        dto.Cor.Should().Be(filamento.Cor);
+        dto.ValorCompra.Should().Be(filamento.ValorCompra);
+        dto.PesoLiquidoGramas.Should().Be(filamento.PesoLiquidoGramas);
+        dto.Tipo.Should().Be(filamento.Tipo);
+        dto.DataCompra.Should().Be(filamento.DataCompra);
     }
 
     [Fact(DisplayName = "Deve mapear DTO de criação para filamento.")]
     public void ToEntity_DeveMapearPesoEmGramasETipo()
     {
         var dto = FilamentoDtoMock.CreateFilamentoDtoValido();
-        dto.Peso = 1000;
+        dto.PesoLiquidoGramas = 1000;
         dto.Tipo = TipoFilamento.PLA;
 
         var filamento = dto.ToEntity();
 
-        filamento.Peso.Should().Be(1000);
+        filamento.PesoLiquidoGramas.Should().Be(1000);
         filamento.Tipo.Should().Be(TipoFilamento.PLA);
         filamento.Cor.Should().Be(dto.Cor);
-        filamento.Valor.Should().Be(dto.Valor);
+        filamento.ValorCompra.Should().Be(dto.ValorCompra);
         filamento.DataCompra.Should().Be(dto.DataCompra);
     }
 }

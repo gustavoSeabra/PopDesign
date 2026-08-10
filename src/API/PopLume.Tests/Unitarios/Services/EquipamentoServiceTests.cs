@@ -201,9 +201,9 @@ public class EquipamentoServiceTests
         equipamentoAdicionado!.Nome.Should().Be(dto.Nome);
         equipamentoAdicionado.Apelido.Should().Be(dto.Apelido);
         equipamentoAdicionado.DataCompra.Should().Be(dto.DataCompra!.Value);
-        equipamentoAdicionado.Potencia.Should().Be(dto.Potencia!.Value);
+        equipamentoAdicionado.PotenciaWatts.Should().Be(dto.PotenciaWatts!.Value);
         equipamentoAdicionado.ValorCompra.Should().Be(dto.ValorCompra!.Value);
-        equipamentoAdicionado.ExpectativaVida.Should().Be(dto.ExpectativaVida!.Value);
+        equipamentoAdicionado.VidaUtilHoras.Should().Be(dto.VidaUtilHoras!.Value);
         equipamentoAdicionado.Excluido.Should().BeFalse();
 
         _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -240,9 +240,9 @@ public class EquipamentoServiceTests
         equipamentoAtualizado!.Nome.Should().Be(dto.Nome);
         equipamentoAtualizado.Apelido.Should().Be(dto.Apelido);
         equipamentoAtualizado.DataCompra.Should().Be(dto.DataCompra!.Value);
-        equipamentoAtualizado.Potencia.Should().Be(dto.Potencia!.Value);
+        equipamentoAtualizado.PotenciaWatts.Should().Be(dto.PotenciaWatts!.Value);
         equipamentoAtualizado.ValorCompra.Should().Be(dto.ValorCompra!.Value);
-        equipamentoAtualizado.ExpectativaVida.Should().Be(dto.ExpectativaVida!.Value);
+        equipamentoAtualizado.VidaUtilHoras.Should().Be(dto.VidaUtilHoras!.Value);
 
         _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }

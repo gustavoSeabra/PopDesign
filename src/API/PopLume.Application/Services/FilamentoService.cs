@@ -94,8 +94,8 @@ public class FilamentoService(
                 return ResultadoDto<bool>.RetornaNaoEncontrado("Filamento não encontrado para atualização.");
 
             filamento.Cor = dto.Cor;
-            filamento.Valor = dto.Valor!.Value;
-            filamento.Peso = dto.Peso!.Value;
+            filamento.ValorCompra = dto.ValorCompra!.Value;
+            filamento.PesoLiquidoGramas = dto.PesoLiquidoGramas!.Value;
             filamento.Tipo = dto.Tipo!.Value;
             filamento.DataCompra = dto.DataCompra!.Value;
 

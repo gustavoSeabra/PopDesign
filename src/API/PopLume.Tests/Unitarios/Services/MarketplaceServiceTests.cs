@@ -151,8 +151,8 @@ public class MarketplaceServiceTests
     {
         // Arrange
         var dto = MarketplaceDtoMock.CreateMarketplaceDtoValido(quantidadeTaxas: 2);
-        dto.TaxasMarketplace![0].Comissao = 2.75m;
-        dto.TaxasMarketplace[1].Comissao = null;
+        dto.TaxasMarketplace![0].ComissaoPercentual = 2.75m;
+        dto.TaxasMarketplace[1].ComissaoPercentual = null;
         Marketplace? marketplaceAdicionado = null;
 
         _marketplaceRepositoryMock
@@ -175,8 +175,8 @@ public class MarketplaceServiceTests
         marketplaceAdicionado.LinkLoja.Should().Be(dto.LinkLoja);
         marketplaceAdicionado.Excluido.Should().BeFalse();
         marketplaceAdicionado.TaxasMarketplace.Should().HaveCount(dto.TaxasMarketplace!.Count);
-        marketplaceAdicionado.TaxasMarketplace.First().Comissao.Should().Be(2.75m);
-        marketplaceAdicionado.TaxasMarketplace.Last().Comissao.Should().Be(0m);
+        marketplaceAdicionado.TaxasMarketplace.First().ComissaoPercentual.Should().Be(2.75m);
+        marketplaceAdicionado.TaxasMarketplace.Last().ComissaoPercentual.Should().Be(0m);
 
         _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -220,9 +220,13 @@ public class MarketplaceServiceTests
         var taxaAtualizada = marketplaceExistente.TaxasMarketplace.First();
         var taxaRemovida = marketplaceExistente.TaxasMarketplace.Last();
         var novaTaxa = MarketplaceDtoMock.UpdateMarketplaceTaxaDtoValida();
-        novaTaxa.Comissao = null;
+        novaTaxa.ComissaoPercentual = null;
         var dtoTaxaAtualizada = MarketplaceDtoMock.UpdateMarketplaceTaxaDtoValida(taxaAtualizada.IdTaxa);
-        dtoTaxaAtualizada.Comissao = 2.75m;
+        dtoTaxaAtualizada.ComissaoPercentual = 2.75m;
+        dtoTaxaAtualizada.ValorInicial = 0m;
+        dtoTaxaAtualizada.ValorFinal = 99.99m;
+        novaTaxa.ValorInicial = 100m;
+        novaTaxa.ValorFinal = 199.99m;
         var dto = MarketplaceDtoMock.UpdateMarketplaceDtoValido(
             marketplaceExistente.IdMarketplace,
             new List<UpdateMarketplaceTaxaDto> { dtoTaxaAtualizada, novaTaxa });
@@ -248,14 +252,14 @@ public class MarketplaceServiceTests
         var taxaAtualizadaResultado = marketplaceExistente.TaxasMarketplace.Single(taxa => taxa.IdTaxa == taxaAtualizada.IdTaxa);
         taxaAtualizadaResultado.ValorInicial.Should().Be(dtoTaxaAtualizada.ValorInicial!.Value);
         taxaAtualizadaResultado.ValorFinal.Should().Be(dtoTaxaAtualizada.ValorFinal!.Value);
-        taxaAtualizadaResultado.Comissao.Should().Be(dtoTaxaAtualizada.Comissao!.Value);
+        taxaAtualizadaResultado.ComissaoPercentual.Should().Be(dtoTaxaAtualizada.ComissaoPercentual!.Value);
         taxaAtualizadaResultado.TaxaFixa.Should().Be(dtoTaxaAtualizada.TaxaFixa!.Value);
 
         marketplaceExistente.TaxasMarketplace.Should().Contain(taxa =>
             taxa.IdTaxa == Guid.Empty &&
             taxa.ValorInicial == novaTaxa.ValorInicial!.Value &&
             taxa.ValorFinal == novaTaxa.ValorFinal!.Value &&
-            taxa.Comissao == 0m &&
+            taxa.ComissaoPercentual == 0m &&
             taxa.TaxaFixa == novaTaxa.TaxaFixa!.Value);
 
         _marketplaceRepositoryMock.Verify(repository => repository.Atualizar(It.IsAny<Marketplace>()), Times.Never);

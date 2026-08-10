@@ -15,17 +15,17 @@ public class EquipamentoMapperTests
         var equipamento = new Equipamento
         {
             ValorCompra = 4000m,
-            ExpectativaVida = 2000
+            VidaUtilHoras = 2000
         };
 
         typeof(Equipamento)
-            .GetProperty(nameof(Equipamento.ValorHora))!
+            .GetProperty(nameof(Equipamento.CustoDepreciacaoHora))!
             .SetValue(equipamento, valorHora);
 
         // Act
         var dto = equipamento.ToDto();
 
         // Assert
-        dto.ValorHora.Should().Be(valorHora);
+        dto.CustoDepreciacaoHora.Should().Be(valorHora);
     }
 }

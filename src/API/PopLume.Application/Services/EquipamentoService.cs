@@ -143,12 +143,12 @@ public class EquipamentoService(IEquipamentoRepository equipamentoRepository, IL
                 equipamentoExistente.Apelido = dto.Apelido;
             if (dto.DataCompra.HasValue)
                 equipamentoExistente.DataCompra = dto.DataCompra.Value;
-            if (dto.Potencia.HasValue)
-                equipamentoExistente.Potencia = dto.Potencia.Value;
+            if (dto.PotenciaWatts.HasValue)
+                equipamentoExistente.PotenciaWatts = dto.PotenciaWatts.Value;
             if (dto.ValorCompra.HasValue)
                 equipamentoExistente.ValorCompra = dto.ValorCompra.Value;
-            if (dto.ExpectativaVida.HasValue)
-                equipamentoExistente.ExpectativaVida = dto.ExpectativaVida.Value;
+            if (dto.VidaUtilHoras.HasValue)
+                equipamentoExistente.VidaUtilHoras = dto.VidaUtilHoras.Value;
 
             equipamentoRepository.Atualizar(equipamentoExistente);
             await equipamentoRepository.UnitOfWork.SaveChangesAsync(cancellationToken);

@@ -21,11 +21,11 @@ public class EquipamentoEntityConfigurationTests
         configuration.Configure(entityBuilder);
 
         // Assert
-        var propriedade = entityBuilder.Metadata.FindProperty(nameof(Equipamento.ValorHora));
+        var propriedade = entityBuilder.Metadata.FindProperty(nameof(Equipamento.CustoDepreciacaoHora));
 
         propriedade.Should().NotBeNull();
         propriedade!.FindAnnotation("Relational:ComputedColumnSql")!.Value.Should().Be(
-            """CASE WHEN "ExpectativaVida" > 0 THEN "ValorCompra" / "ExpectativaVida" ELSE 0 END""");
+            """CASE WHEN "VidaUtilHoras" > 0 THEN "ValorCompra" / "VidaUtilHoras" ELSE 0 END""");
         propriedade.FindAnnotation("Relational:IsStored")!.Value.Should().Be(true);
     }
 }

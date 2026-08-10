@@ -14,7 +14,13 @@ public static class MarketplaceDtoMock
             Nome = Faker.Company.CompanyName(),
             LinkLoja = Faker.Internet.Url(),
             TaxasMarketplace = Enumerable.Range(0, quantidadeTaxas)
-                .Select(_ => CreateMarketplaceTaxaDtoValida())
+                .Select(indice => new CreateMarketplaceTaxaDto
+                {
+                    ValorInicial = indice * 100m,
+                    ValorFinal = indice * 100m + 99.99m,
+                    ComissaoPercentual = Faker.Finance.Amount(1, 30, 2),
+                    TaxaFixa = Faker.Finance.Amount(0, 50)
+                })
                 .ToList()
         };
 
@@ -32,7 +38,7 @@ public static class MarketplaceDtoMock
         {
             ValorInicial = Faker.Finance.Amount(0, 100),
             ValorFinal = Faker.Finance.Amount(101, 500),
-            Comissao = Faker.Finance.Amount(1, 30, 2),
+            ComissaoPercentual = Faker.Finance.Amount(1, 30, 2),
             TaxaFixa = Faker.Finance.Amount(0, 50)
         };
 
@@ -42,7 +48,7 @@ public static class MarketplaceDtoMock
             IdTaxa = idTaxa,
             ValorInicial = Faker.Finance.Amount(0, 100),
             ValorFinal = Faker.Finance.Amount(101, 500),
-            Comissao = Faker.Finance.Amount(1, 30, 2),
+            ComissaoPercentual = Faker.Finance.Amount(1, 30, 2),
             TaxaFixa = Faker.Finance.Amount(0, 50)
         };
 
@@ -56,7 +62,15 @@ public static class MarketplaceDtoMock
         };
 
         marketplace.TaxasMarketplace = Enumerable.Range(0, quantidadeTaxas)
-            .Select(_ => TaxaMarketplaceValida(marketplace.IdMarketplace))
+            .Select(indice => new TaxasMarketplace
+            {
+                IdTaxa = Guid.NewGuid(),
+                IdMarketplace = marketplace.IdMarketplace,
+                ValorInicial = indice * 100m,
+                ValorFinal = indice * 100m + 99.99m,
+                ComissaoPercentual = Faker.Finance.Amount(1, 30, 2),
+                TaxaFixa = Faker.Finance.Amount(0, 50)
+            })
             .ToList();
 
         return marketplace;
@@ -69,7 +83,7 @@ public static class MarketplaceDtoMock
             IdMarketplace = idMarketplace,
             ValorInicial = Faker.Finance.Amount(0, 100),
             ValorFinal = Faker.Finance.Amount(101, 500),
-            Comissao = Faker.Finance.Amount(1, 30, 2),
+            ComissaoPercentual = Faker.Finance.Amount(1, 30, 2),
             TaxaFixa = Faker.Finance.Amount(0, 50)
         };
 

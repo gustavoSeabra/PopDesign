@@ -15,7 +15,7 @@ public static class TaxasMarketplaceMapper
             IdMarketplace = taxaMarketplace.IdMarketplace,
             ValorInicial = taxaMarketplace.ValorInicial,
             ValorFinal = taxaMarketplace.ValorFinal,
-            Comissao = taxaMarketplace.Comissao,
+            ComissaoPercentual = taxaMarketplace.ComissaoPercentual,
             TaxaFixa = taxaMarketplace.TaxaFixa,
             MarketplaceNome = taxaMarketplace.Marketplace?.Nome ?? string.Empty
         };
@@ -28,8 +28,8 @@ public static class TaxasMarketplaceMapper
         return new TaxasMarketplace
         {
             ValorInicial = dto.ValorInicial!.Value,
-            ValorFinal = dto.ValorFinal!.Value,
-            Comissao = dto.Comissao ?? 0m,
+            ValorFinal = dto.ValorFinal,
+            ComissaoPercentual = dto.ComissaoPercentual ?? 0m,
             TaxaFixa = dto.TaxaFixa!.Value
         };
     }
