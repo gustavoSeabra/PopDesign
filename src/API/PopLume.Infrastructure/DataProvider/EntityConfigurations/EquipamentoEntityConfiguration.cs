@@ -1,0 +1,29 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PopLume.Domain.Entities;
+
+namespace PopLume.Infrastructure.DataProvider.EntityConfigurations;
+
+public class EquipamentoEntityConfiguration : IEntityTypeConfiguration<Equipamento>
+{
+    public void Configure(EntityTypeBuilder<Equipamento> builder)
+    {
+        builder.ToTable("Equipamento");
+        builder.HasKey(e => e.IdEquipamento);
+        builder.HasQueryFilter(e => !e.Excluido);
+
+        builder.Property(e => e.Nome).IsRequired().HasMaxLength(100);
+        builder.Property(e => e.Apelido).HasMaxLength(50);
+        builder.Property(e => e.DataCompra).HasColumnType("date").IsRequired();
+        builder.Property(e => e.PotenciaWatts).IsRequired();
+        builder.Property(e => e.ValorCompra).HasPrecision(10, 2);
+        builder.Property(e => e.VidaUtilHoras);
+        builder.Property(e => e.CustoDepreciacaoHora)
+            .HasPrecision(10, 2)
+            .HasComputedColumnSql(
+                """CASE WHEN "VidaUtilHoras" > 0 THEN "ValorCompra" / "VidaUtilHoras" ELSE 0 END""",
+                stored: true);
+        builder.Property(e => e.Excluido).IsRequired().HasDefaultValue(false);
+        builder.Property(e => e.DataExclusao);
+    }
+}

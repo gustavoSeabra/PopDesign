@@ -1,37 +1,71 @@
 Table Equipamento {
   IdEquipamento uuid [pk, not null]
   Nome varchar(100) [not null]
-  Apelido varchar(50) [null]
+  Apelido varchar(50) [not null]
   DataCompra date [not null]
-  Potencia int [not null]
+  PotenciaWatts int [not null, note: 'Potência nominal em watts']
   ValorCompra decimal(10,2) [not null]
-  ExpectativaVida int [not null, note: 'Expectativa de vida útil em horas']
-  ValorHora decimal(10,2) [not null, note: 'Calculado: ValorCompra / ExpectativaVida']
+  VidaUtilHoras int [not null, note: 'Vida útil estimada em horas']
+  CustoDepreciacaoHora decimal(10,2) [not null, note: 'Coluna calculada: ValorCompra / VidaUtilHoras']
   Excluido boolean [not null, default: false]
-  DataExclusao datetime [null]
+  DataExclusao timestamp [null]
 }
 
 Table Produto {
   IdProduto uuid [pk, not null]
   Nome varchar(100) [not null]
-  PrecoCusto decimal(10,2) [not null]
-  QuantidadeFilamento decimal(8,2) [not null]
-  TempoImpressao int [not null]
+  PrecoCusto decimal(10,2) [not null, note: 'Atualizado somente por uma precificação persistida']
+  TempoImpressaoMinutos int [not null]
+  TempoMaoDeObraMinutos int [not null]
+  IdEquipamento uuid [null]
 }
 
 Table Filamento {
   IdFilamento uuid [pk, not null]
   Cor varchar(50) [not null]
-  Valor decimal(10,2) [not null]
-  Peso decimal(10,2) [not null, note: 'Peso em gramas']
+  ValorCompra decimal(10,2) [not null]
+  PesoLiquidoGramas decimal(10,3) [not null]
   Tipo varchar(10) [not null, note: 'ABS, PETG, PLA ou TPU']
   DataCompra date [not null]
 }
 
+Table ProdutoFilamento {
+  IdProdutoFilamento uuid [pk, not null]
+  IdProduto uuid [not null]
+  IdFilamento uuid [not null]
+  QuantidadeGramas decimal(10,3) [not null]
+  PercentualPerda decimal(5,2) [not null]
+
+  indexes {
+    (IdProduto, IdFilamento) [unique]
+  }
+}
+
+Table Insumo {
+  IdInsumo uuid [pk, not null]
+  Nome varchar(100) [not null]
+  ValorCompra decimal(10,2) [not null]
+  QuantidadeComprada decimal(12,4) [not null]
+  UnidadeMedida varchar(20) [not null, note: 'Unidade, Grama, Quilograma, Centimetro, Metro, Mililitro ou Litro']
+  Excluido boolean [not null, default: false]
+  DataExclusao timestamp [null]
+}
+
+Table ProdutoInsumo {
+  IdProdutoInsumo uuid [pk, not null]
+  IdProduto uuid [not null]
+  IdInsumo uuid [not null]
+  QuantidadeUtilizada decimal(12,4) [not null]
+
+  indexes {
+    (IdProduto, IdInsumo) [unique]
+  }
+}
+
 Table Produto_Composicao {
   IdProdutoComposicao uuid [pk, not null]
-  IdProdutoPai uuid [null]
-  IdProdutoFilho uuid [null]
+  IdProdutoPai uuid [not null]
+  IdProdutoFilho uuid [not null]
   Quantidade int [not null, default: 1]
 
   indexes {
@@ -39,26 +73,103 @@ Table Produto_Composicao {
   }
 }
 
-table Marketplace
-{
-  IdMarketplace uuid [primary key]
+Table Marketplace {
+  IdMarketplace uuid [pk, not null]
   Nome varchar(100) [not null]
-  LinkLoja varchar(100)
+  LinkLoja varchar(100) [not null]
   Excluido boolean [not null, default: false]
-  DataExclusao datetime [null]
+  DataExclusao timestamp [null]
 }
 
-table TaxasMarketplace
-{
-  IdTaxa uuid [primary key]
+Table TaxasMarketplace {
+  IdTaxa uuid [pk, not null]
   IdMarketplace uuid [not null]
-  ValorInicial NUMERIC(10, 2) [not null]
-  ValorFinal NUMERIC(10, 2) [not null]
-  Comissao NUMERIC(5, 2) [not null]
-  TaxaFixa NUMERIC(10, 2)
+  ValorInicial decimal(10,2) [not null]
+  ValorFinal decimal(10,2) [null, note: 'Nulo representa uma faixa sem limite superior']
+  ComissaoPercentual decimal(5,2) [not null, note: 'Percentual entre 0 e 100']
+  TaxaFixa decimal(10,2) [not null]
 }
+
+Table TarifaEnergia {
+  IdTarifaEnergia uuid [pk, not null]
+  ValorKwh decimal(10,4) [not null]
+  InicioVigencia date [not null]
+  FimVigencia date [null]
+
+  indexes {
+    InicioVigencia
+  }
+}
+
+Table CustoMaoDeObra {
+  IdCustoMaoDeObra uuid [pk, not null]
+  ValorHora decimal(10,2) [not null]
+  InicioVigencia date [not null]
+  FimVigencia date [null]
+
+  indexes {
+    InicioVigencia
+  }
+}
+
+Table FichaPrecificacao {
+  IdFichaPrecificacao uuid [pk, not null]
+  IdProduto uuid [not null]
+  IdEquipamento uuid [not null]
+  IdTarifaEnergia uuid [not null]
+  IdCustoMaoDeObra uuid [not null]
+  IdMarketplace uuid [null]
+  IdTaxaMarketplace uuid [null]
+  CalculadaEmUtc timestamp [not null]
+  QuantidadeProduzida int [not null]
+  MargemPercentual decimal(5,2) [not null]
+  ComissaoPercentual decimal(5,2) [not null]
+  TaxaFixa decimal(10,2) [not null]
+  CustoFilamentos decimal(14,4) [not null]
+  CustoInsumos decimal(14,4) [not null]
+  CustoComponentes decimal(14,4) [not null]
+  CustoEnergia decimal(14,4) [not null]
+  CustoEquipamento decimal(14,4) [not null]
+  CustoMaoDeObra decimal(14,4) [not null]
+  CustoTotalLote decimal(14,4) [not null]
+  CustoUnitario decimal(14,4) [not null]
+  ValorComissao decimal(14,4) [not null]
+  LucroUnitario decimal(14,4) [not null]
+  PrecoVenda decimal(10,2) [not null]
+
+  indexes {
+    (IdProduto, CalculadaEmUtc)
+  }
+}
+
+Table ItemFichaPrecificacao {
+  IdItemFichaPrecificacao uuid [pk, not null]
+  IdFichaPrecificacao uuid [not null]
+  Tipo varchar(30) [not null, note: 'Filamento, Insumo, ProdutoComponente, Energia, Equipamento, MaoDeObra ou TaxaMarketplace']
+  Descricao varchar(200) [not null]
+  Quantidade decimal(14,4) [not null]
+  ValorUnitario decimal(14,4) [not null]
+  ValorTotal decimal(14,4) [not null]
+}
+
+Ref: Produto.IdEquipamento > Equipamento.IdEquipamento [delete: restrict]
+
+Ref: ProdutoFilamento.IdProduto > Produto.IdProduto [delete: cascade]
+Ref: ProdutoFilamento.IdFilamento > Filamento.IdFilamento [delete: restrict]
+
+Ref: ProdutoInsumo.IdProduto > Produto.IdProduto [delete: cascade]
+Ref: ProdutoInsumo.IdInsumo > Insumo.IdInsumo [delete: restrict]
 
 Ref: Produto_Composicao.IdProdutoPai > Produto.IdProduto [delete: cascade]
 Ref: Produto_Composicao.IdProdutoFilho > Produto.IdProduto [delete: restrict]
 
-Ref: Marketplace.IdMarketplace < TaxasMarketplace.IdMarketplace
+Ref: TaxasMarketplace.IdMarketplace > Marketplace.IdMarketplace [delete: cascade]
+
+Ref: FichaPrecificacao.IdProduto > Produto.IdProduto [delete: restrict]
+Ref: FichaPrecificacao.IdEquipamento > Equipamento.IdEquipamento [delete: restrict]
+Ref: FichaPrecificacao.IdTarifaEnergia > TarifaEnergia.IdTarifaEnergia [delete: restrict]
+Ref: FichaPrecificacao.IdCustoMaoDeObra > CustoMaoDeObra.IdCustoMaoDeObra [delete: restrict]
+Ref: FichaPrecificacao.IdMarketplace > Marketplace.IdMarketplace [delete: restrict]
+Ref: FichaPrecificacao.IdTaxaMarketplace > TaxasMarketplace.IdTaxa [delete: restrict]
+
+Ref: ItemFichaPrecificacao.IdFichaPrecificacao > FichaPrecificacao.IdFichaPrecificacao [delete: cascade]
